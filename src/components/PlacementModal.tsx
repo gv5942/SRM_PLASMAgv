@@ -109,6 +109,7 @@ const PlacementModal: React.FC<PlacementModalProps> = ({ isOpen, onClose, onSave
               Placement Date
             </label>
             <input
+              
               type="date"
               required
               value={formData.placementDate}
