@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { Student } from '../types';
 import { useAuth } from '../contexts/AuthContext';
+import { useDepartments } from '../utils/departmentUtils';
 
 interface StudentModalProps {
   isOpen: boolean;
@@ -12,29 +13,20 @@ interface StudentModalProps {
 
 const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, student }) => {
   const { user, mentors } = useAuth();
+  const { departmentNames } = useDepartments();
   const [formData, setFormData] = useState({
     rollNumber: '',
     studentName: '',
     email: '',
     mobileNumber: '',
     department: '',
+    section: '',
     mentorId: user?.role === 'mentor' ? user.id : '',
     tenthPercentage: '',
     twelfthPercentage: '',
     ugPercentage: '',
     status: 'eligible' as 'eligible' | 'ineligible' | 'higher_studies',
   });
-
-  const departments = [
-    'Computer Science',
-    'Information Technology',
-    'Electronics & Communication',
-    'Mechanical Engineering',
-    'Civil Engineering',
-    'Electrical Engineering',
-    'Chemical Engineering',
-    'Biotechnology',
-  ];
 
   const activeMentors = mentors.filter(mentor => mentor.role === 'mentor' && mentor.isActive);
 
@@ -44,6 +36,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
     { value: 'higher_studies', label: 'Higher Studies' },
   ];
 
+  const sections = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H'];
   useEffect(() => {
     if (student) {
       setFormData({
@@ -52,6 +45,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
         email: student.email,
         mobileNumber: student.mobileNumber,
         department: student.department,
+        section: student.section,
         mentorId: student.mentorId,
         tenthPercentage: student.academicDetails.tenthPercentage.toString(),
         twelfthPercentage: student.academicDetails.twelfthPercentage.toString(),
@@ -65,6 +59,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
         email: '',
         mobileNumber: '',
         department: '',
+        section: '',
         mentorId: user?.role === 'mentor' ? user.id : '',
         tenthPercentage: '',
         twelfthPercentage: '',
@@ -93,6 +88,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
       email: formData.email,
       mobileNumber: formData.mobileNumber,
       department: formData.department,
+      section: formData.section,
       mentorId: formData.mentorId,
       academicDetails: {
         tenthPercentage,
@@ -208,12 +204,29 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
                   aria-label="Department"
                 >
                   <option value="">Select Department</option>
-                  {departments.map(dept => (
+                  {departmentNames.map(dept => (
                     <option key={dept} value={dept}>{dept}</option>
                   ))}
                 </select>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Section *
+                </label>
+                <select
+                  required
+                  value={formData.section}
+                  onChange={(e) => setFormData({ ...formData, section: e.target.value })}
+                  className="select-field"
+                  aria-label="Section"
+                >
+                  <option value="">Select Section</option>
+                  {sections.map(section => (
+                    <option key={section} value={section}>Section {section}</option>
+                  ))}
+                </select>
+              </div>
               {user?.role === 'admin' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">

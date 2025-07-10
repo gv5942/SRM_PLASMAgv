@@ -1,15 +1,5 @@
 import { Student } from '../types';
-
-const departments = [
-  'Computer Science',
-  'Information Technology',
-  'Electronics & Communication',
-  'Mechanical Engineering',
-  'Civil Engineering',
-  'Electrical Engineering',
-  'Chemical Engineering',
-  'Biotechnology',
-];
+import { getDefaultDepartments } from './departmentUtils';
 
 const companies = [
   'Google',
@@ -87,6 +77,10 @@ function generateRollNumber(dept: string, year: number, index: number): string {
   return `${year}${deptCode}${String(index).padStart(3, '0')}`;
 }
 
+function getRandomSection(): string {
+  const sections = ['A', 'B', 'C', 'D', 'E', 'F'];
+  return sections[Math.floor(Math.random() * sections.length)];
+}
 function generateEmail(firstName: string, lastName: string, rollNumber: string): string {
   const cleanFirstName = firstName.toLowerCase().replace(/\s+/g, '');
   const cleanLastName = lastName.toLowerCase().replace(/\s+/g, '');
@@ -108,6 +102,7 @@ function determineEligibility(academicDetails: { tenthPercentage: number; twelft
 export function generateMockStudents(mentorIds?: string[]): Student[] {
   // Use provided mentor IDs or default ones
   const availableMentorIds = mentorIds || ['mentor_1_1', 'mentor_1_2', 'mentor_1_3', 'mentor_1_4'];
+  const departments = getDefaultDepartments().filter(dept => dept.isActive).map(dept => dept.name);
   
   const students: Student[] = [];
   const startDate = new Date('2023-01-01');
@@ -153,6 +148,7 @@ export function generateMockStudents(mentorIds?: string[]): Student[] {
       email,
       mobileNumber,
       department,
+      section: getRandomSection(),
       mentorId,
       academicDetails,
       status,

@@ -16,6 +16,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, onC
 
   // Get unique values for dropdowns
   const departments = [...new Set(students.map(s => s.department))].sort();
+  const sections = [...new Set(students.map(s => s.section))].sort();
   const companies = [...new Set(students.filter(s => s.placementRecord).map(s => s.placementRecord!.company))].sort();
   const years = [...new Set(students.filter(s => s.placementRecord).map(s => new Date(s.placementRecord!.placementDate).getFullYear().toString()))].sort().reverse();
   
@@ -141,6 +142,19 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, onC
           ))}
         </select>
 
+        {/* Section */}
+        <select
+          aria-label="Filter by section"
+          title="Filter by section"
+          value={filters.section}
+          onChange={(e) => handleFilterChange('section', e.target.value)}
+          className="select-field"
+        >
+          <option value="">All Sections</option>
+          {sections.map(section => (
+            <option key={section} value={section}>Section {section}</option>
+          ))}
+        </select>
         {/* Status */}
         <select
           aria-label="Filter by status"

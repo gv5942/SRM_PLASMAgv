@@ -26,6 +26,7 @@ const DataContext = createContext<DataContextType | undefined>(undefined);
 
 const initialFilters: FilterOptions = {
   department: '',
+  section: '',
   company: '',
   year: '',
   mentor: '',
@@ -73,6 +74,11 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       );
     }
 
+    if (filters.section) {
+      filtered = filtered.filter(student => 
+        student.section === filters.section
+      );
+    }
     if (filters.company && filters.company !== '') {
       filtered = filtered.filter(student => 
         student.placementRecord?.company.toLowerCase().includes(filters.company.toLowerCase())

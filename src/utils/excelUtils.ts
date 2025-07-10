@@ -1,6 +1,7 @@
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { PlacementRecord, Student } from '../types';
+import { useDepartments } from './departmentUtils';
 
 export const exportToExcel = (data: any[], filename: string = 'placement_data.xlsx') => {
   const worksheet = XLSX.utils.json_to_sheet(data);
@@ -60,6 +61,7 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
             email: row['Email'] || row['email'] || row['Email Address'] || '',
             mobileNumber: row['Mobile Number'] || row['mobileNumber'] || row['Phone'] || row['phone'] || '',
             department: row['Department'] || row['department'] || '',
+            section: row['Section'] || row['section'] || 'A',
             mentorId: row['Mentor ID'] || row['mentorId'] || '2', // Default to first mentor
             academicDetails: {
               tenthPercentage,
@@ -106,14 +108,23 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
 };
 
 // Template generator for Excel import
-export const generateExcelTemplate = () => {
+export const generateExcelTemplate = (departmentNames?: string[]) => {
+  // Use provided department names or fallback to default
+  const departments = departmentNames || [
+    'Computer Science',
+    'Information Technology', 
+    'Electronics & Communication',
+    'Mechanical Engineering'
+  ];
+  
   const templateData = [
     {
       'Roll Number': '2024CS001',
       'Student Name': 'John Doe',
       'Email': 'john.doe@student.university.edu',
       'Mobile Number': '+1-555-0123',
-      'Department': 'Computer Science',
+      'Department': departments[0],
+      'Section': 'A',
       'Mentor ID': '2',
       '10th Percentage': '85.5',
       '12th Percentage': '78.2',
@@ -128,7 +139,8 @@ export const generateExcelTemplate = () => {
       'Student Name': 'Jane Smith',
       'Email': 'jane.smith@student.university.edu',
       'Mobile Number': '+1-555-0124',
-      'Department': 'Information Technology',
+      'Department': departments[1] || 'Information Technology',
+      'Section': 'B',
       'Mentor ID': '3',
       '10th Percentage': '92.0',
       '12th Percentage': '88.5',
@@ -143,7 +155,8 @@ export const generateExcelTemplate = () => {
       'Student Name': 'Mike Johnson',
       'Email': 'mike.johnson@student.university.edu',
       'Mobile Number': '+1-555-0125',
-      'Department': 'Mechanical Engineering',
+      'Department': departments[2] || 'Mechanical Engineering',
+      'Section': 'C',
       'Mentor ID': '4',
       '10th Percentage': '65.0',
       '12th Percentage': '70.5',

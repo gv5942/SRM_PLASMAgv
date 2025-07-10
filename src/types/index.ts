@@ -18,6 +18,7 @@ export interface Student {
   email: string;
   mobileNumber: string;
   department: string;
+  section: string;
   mentorId: string;
   academicDetails: {
     tenthPercentage: number;
@@ -45,6 +46,7 @@ export interface User {
 
 export interface FilterOptions {
   department: string;
+  section: string;
   company: string;
   year: string;
   mentor: string;

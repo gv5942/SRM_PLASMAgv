@@ -131,6 +131,15 @@ const DataTable: React.FC<DataTableProps> = ({ data, onEdit, onDelete, onAddPlac
               </th>
               <th
                 className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                onClick={() => handleSort('section')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Section</span>
+                  <SortIcon field="section" />
+                </div>
+              </th>
+              <th
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                 onClick={() => handleSort('status')}
               >
                 <div className="flex items-center space-x-1">
@@ -178,6 +187,11 @@ const DataTable: React.FC<DataTableProps> = ({ data, onEdit, onDelete, onAddPlac
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {student.department}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    Section {student.section}
+                  </span>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {getStatusBadge(student.status)}
@@ -326,6 +340,10 @@ const DataTable: React.FC<DataTableProps> = ({ data, onEdit, onDelete, onAddPlac
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Department</label>
                       <p className="mt-1 text-sm text-gray-900">{viewingStudent.department}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">Section</label>
+                      <p className="mt-1 text-sm text-gray-900">Section {viewingStudent.section}</p>
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Status</label>
