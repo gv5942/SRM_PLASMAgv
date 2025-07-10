@@ -2,7 +2,7 @@ import { Student } from '../types';
 import { getDefaultDepartments } from './departmentUtils';
 
 const companies = [
-  'Google',
+  /*'Google',
   'Microsoft',
   'Amazon',
   'Apple',
@@ -26,19 +26,19 @@ const companies = [
   'TCS',
   'Wipro',
   'Accenture',
-  'Deloitte',
+  'Deloitte',*/
 ];
 
 const firstNames = [
-  'Aarav', 'Vivaan', 'Aditya', 'Vihaan', 'Arjun', 'Sai', 'Reyansh', 'Ayaan', 'Krishna', 'Ishaan',
+  /*'Aarav', 'Vivaan', 'Aditya', 'Vihaan', 'Arjun', 'Sai', 'Reyansh', 'Ayaan', 'Krishna', 'Ishaan',
   'Ananya', 'Diya', 'Priya', 'Kavya', 'Aanya', 'Ira', 'Myra', 'Sara', 'Riya', 'Aditi',
   'Rahul', 'Rohan', 'Amit', 'Vikram', 'Suresh', 'Rajesh', 'Kiran', 'Deepak', 'Manoj', 'Sandeep',
-  'Sneha', 'Pooja', 'Meera', 'Nisha', 'Kavita', 'Sunita', 'Rekha', 'Geeta', 'Sita', 'Rita',
+  'Sneha', 'Pooja', 'Meera', 'Nisha', 'Kavita', 'Sunita', 'Rekha', 'Geeta', 'Sita', 'Rita',*/
 ];
 
 const lastNames = [
-  'Sharma', 'Verma', 'Gupta', 'Singh', 'Kumar', 'Agarwal', 'Jain', 'Patel', 'Shah', 'Mehta',
-  'Reddy', 'Rao', 'Nair', 'Iyer', 'Menon', 'Pillai', 'Das', 'Roy', 'Ghosh', 'Banerjee',
+  /*'Sharma', 'Verma', 'Gupta', 'Singh', 'Kumar', 'Agarwal', 'Jain', 'Patel', 'Shah', 'Mehta',
+  'Reddy', 'Rao', 'Nair', 'Iyer', 'Menon', 'Pillai', 'Das', 'Roy', 'Ghosh', 'Banerjee',*/
 ];
 
 function getRandomElement<T>(array: T[]): T {
