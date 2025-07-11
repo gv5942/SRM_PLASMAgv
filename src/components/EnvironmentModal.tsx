@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { X, Building, User, Mail, Phone, Plus, Trash2 } from 'lucide-react';
 import { useEnvironment } from '../contexts/EnvironmentContext';
 import { User as UserType } from '../types';
+import { Department, getDefaultDepartments } from '../utils/departmentUtils';
 
 interface EnvironmentModalProps {
   isOpen: boolean;
@@ -81,6 +82,7 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({ isOpen, onClose }) 
       adminUser,
       mentors,
       students: [],
+      departments: getDefaultDepartments(),
       isActive: true,
     });
 

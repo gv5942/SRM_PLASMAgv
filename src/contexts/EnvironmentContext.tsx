@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, Student } from '../types';
+import { Department } from '../utils/departmentUtils';
 
 interface Environment {
   id: string;
@@ -7,6 +8,7 @@ interface Environment {
   adminUser: User;
   mentors: User[];
   students: Student[];
+  departments: Department[];
   createdAt: string;
   isActive: boolean;
 }
@@ -91,6 +93,62 @@ const defaultEnvironments: Environment[] = [
       }
     ],
     students: [],
+    departments: [
+      {
+        id: 'dept_1_1',
+        name: 'Computer Science',
+        code: 'CS',
+        description: 'Computer Science and Engineering',
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z'
+      },
+      {
+        id: 'dept_1_2',
+        name: 'Information Technology',
+        code: 'IT',
+        description: 'Information Technology',
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z'
+      },
+      {
+        id: 'dept_1_3',
+        name: 'Electronics & Communication',
+        code: 'EC',
+        description: 'Electronics and Communication Engineering',
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z'
+      },
+      {
+        id: 'dept_1_4',
+        name: 'Mechanical Engineering',
+        code: 'ME',
+        description: 'Mechanical Engineering',
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z'
+      },
+      {
+        id: 'dept_1_5',
+        name: 'Civil Engineering',
+        code: 'CE',
+        description: 'Civil Engineering',
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z'
+      },
+      {
+        id: 'dept_1_6',
+        name: 'Electrical Engineering',
+        code: 'EE',
+        description: 'Electrical Engineering',
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z'
+      }
+    ],
     createdAt: '2024-01-01T00:00:00.000Z',
     isActive: true
   },
@@ -148,6 +206,35 @@ const defaultEnvironments: Environment[] = [
       }
     ],
     students: [],
+    departments: [
+      {
+        id: 'dept_2_1',
+        name: 'Computer Science',
+        code: 'CS',
+        description: 'Computer Science and Engineering',
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z'
+      },
+      {
+        id: 'dept_2_2',
+        name: 'Information Technology',
+        code: 'IT',
+        description: 'Information Technology',
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z'
+      },
+      {
+        id: 'dept_2_3',
+        name: 'Electronics & Communication',
+        code: 'EC',
+        description: 'Electronics and Communication Engineering',
+        isActive: true,
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-01-01T00:00:00.000Z'
+      }
+    ],
     createdAt: '2024-01-01T00:00:00.000Z',
     isActive: true
   }

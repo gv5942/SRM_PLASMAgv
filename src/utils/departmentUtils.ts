@@ -95,9 +95,8 @@ export const getDefaultDepartments = (): Department[] => {
 export const useDepartments = () => {
   const { currentEnvironment } = useEnvironment();
   
-  // For now, return default departments since environment doesn't have departments yet
-  // This can be extended later when departments are added to environment context
-  const departments = DEFAULT_DEPARTMENTS;
+  // Use departments from current environment or fallback to defaults
+  const departments = currentEnvironment?.departments || DEFAULT_DEPARTMENTS;
   const activeDepartments = departments.filter(dept => dept.isActive);
   const departmentNames = activeDepartments.map(dept => dept.name);
   

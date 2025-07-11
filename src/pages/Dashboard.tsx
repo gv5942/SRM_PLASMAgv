@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Download, Upload, Users } from 'lucide-react';
+import { Plus, Download, Upload, Users, Building } from 'lucide-react';
 import Layout from '../components/Layout';
 import KPICards from '../components/KPICards';
 import Charts from '../components/Charts';
@@ -9,6 +9,7 @@ import StudentModal from '../components/StudentModal';
 import PlacementModal from '../components/PlacementModal';
 import ExcelUpload from '../components/ExcelUpload';
 import MentorManagement from '../components/MentorManagement';
+import DepartmentManagement from '../components/DepartmentManagement';
 import { useAuth } from '../contexts/AuthContext';
 import { useData } from '../contexts/DataContext';
 import { exportToExcel, exportToCSV } from '../utils/excelUtils';
@@ -218,6 +219,17 @@ const Dashboard: React.FC = () => {
                 <Users className="h-4 w-4" />
                 <span>Mentor Management</span>
               </button>
+              <button
+                onClick={() => setActiveTab('departments')}
+                className={`py-2 px-1 border-b-2 font-medium text-sm flex items-center space-x-2 ${
+                  activeTab === 'departments'
+                    ? 'border-primary-500 text-primary-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <Building className="h-4 w-4" />
+                <span>Department Management</span>
+              </button>
             </nav>
           </div>
         )}
@@ -225,6 +237,8 @@ const Dashboard: React.FC = () => {
         {/* Content based on active tab */}
         {activeTab === 'mentors' && user?.role === 'admin' ? (
           <MentorManagement />
+        ) : activeTab === 'departments' && user?.role === 'admin' ? (
+          <DepartmentManagement />
         ) : (
           <>
             {/* Header Actions */}
