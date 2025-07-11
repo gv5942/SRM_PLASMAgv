@@ -3,6 +3,7 @@ import { PlacementRecord, Student, FilterOptions } from '../types';
 import { generateMockStudents } from '../utils/mockData';
 import { useAuth } from './AuthContext';
 import { useEnvironment } from './EnvironmentContext';
+import { useDepartments } from '../utils/departmentUtils';
 
 interface DataContextType {
   students: Student[];
@@ -20,6 +21,8 @@ interface DataContextType {
   getMentorStudents: () => Student[];
   showMyStudentsOnly: boolean;
   setShowMyStudentsOnly: (show: boolean) => void;
+  showInactiveDepartments: boolean;
+  setShowInactiveDepartments: (show: boolean) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
@@ -39,10 +42,12 @@ const initialFilters: FilterOptions = {
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user } = useAuth();
   const { currentEnvironment, updateEnvironment } = useEnvironment();
+  const { activeDepartments, departments } = useDepartments();
   const [students, setStudents] = useState<Student[]>([]);
   const [filteredStudents, setFilteredStudents] = useState<Student[]>([]);
   const [filters, setFilters] = useState<FilterOptions>(initialFilters);
   const [showMyStudentsOnly, setShowMyStudentsOnly] = useState(false);
+  const [showInactiveDepartments, setShowInactiveDepartments] = useState(false);
 
   useEffect(() => {
     if (currentEnvironment) {
@@ -62,6 +67,13 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Apply filters whenever filters, students, user, or showMyStudentsOnly changes
     let filtered = [...students];
 
+    // Filter out students from inactive departments unless explicitly showing them
+    if (!showInactiveDepartments) {
+      const activeDepartmentNames = activeDepartments.map(dept => dept.name);
+      filtered = filtered.filter(student => 
+        activeDepartmentNames.includes(student.department)
+      );
+    }
     // First apply mentor filter if showMyStudentsOnly is true
     if (user?.role === 'mentor' && showMyStudentsOnly) {
       filtered = filtered.filter(student => student.mentorId === user.id);
@@ -130,7 +142,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     setFilteredStudents(filtered);
-  }, [students, filters, user, showMyStudentsOnly]);
+  }, [students, filters, user, showMyStudentsOnly, showInactiveDepartments, activeDepartments]);
 
   const saveStudentsToEnvironment = (updatedStudents: Student[]) => {
     if (currentEnvironment) {
@@ -221,6 +233,7 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const clearFilters = () => {
     setFilters(initialFilters);
     setShowMyStudentsOnly(false);
+    setShowInactiveDepartments(false);
   };
 
   const getStudentsByMentor = (mentorId: string) => {
@@ -252,6 +265,8 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
       getMentorStudents,
       showMyStudentsOnly,
       setShowMyStudentsOnly,
+      showInactiveDepartments,
+      setShowInactiveDepartments,
     }}>
       {children}
     </DataContext.Provider>

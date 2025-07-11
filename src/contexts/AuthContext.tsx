@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { useEnvironment } from './EnvironmentContext';
+import { useDepartments } from '../utils/departmentUtils';
 
 interface AuthContextType {
   user: User | null;
@@ -13,12 +14,14 @@ interface AuthContextType {
   deleteMentor: (id: string) => void;
   resetMentorPassword: (id: string, newPassword: string) => void;
   getMentorById: (id: string) => User | undefined;
+  getActiveMentors: () => User[];
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { currentEnvironment, updateEnvironment } = useEnvironment();
+  const { activeDepartments } = useDepartments();
   const [user, setUser] = useState<User | null>(null);
   const [mentors, setMentors] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -206,6 +209,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return mentors.find(mentor => mentor.id === id);
   };
 
+  const getActiveMentors = () => {
+    const activeDepartmentNames = activeDepartments.map(dept => dept.name);
+    return mentors.filter(mentor => 
+      mentor.isActive && 
+      (!mentor.department || activeDepartmentNames.includes(mentor.department))
+    );
+  };
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -231,3 +241,4 @@ export const useAuth = () => {
   }
   return context;
 };
+      getActiveMentors

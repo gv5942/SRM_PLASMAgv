@@ -206,7 +206,8 @@ const DepartmentManagement: React.FC = () => {
     const mentorsUsingDept = mentors.filter(mentor => mentor.department === department.name);
 
     if (studentsUsingDept.length > 0 || mentorsUsingDept.length > 0) {
-      alert(`Cannot delete department "${department.name}" because it is assigned to ${studentsUsingDept.length} students and ${mentorsUsingDept.length} mentors. Please reassign them first.`);
+      const message = `Cannot delete department "${department.name}" because it is assigned to ${studentsUsingDept.length} students and ${mentorsUsingDept.length} mentors.\n\nOptions:\n1. Reassign all students and mentors to other departments first\n2. Deactivate the department instead (data will be hidden but preserved)`;
+      alert(message);
       return;
     }
 
@@ -219,6 +220,20 @@ const DepartmentManagement: React.FC = () => {
   const handleToggleActive = (department: Department) => {
     if (!currentEnvironment) return;
 
+    const studentsUsingDept = students.filter(student => student.department === department.name);
+    const mentorsUsingDept = mentors.filter(mentor => mentor.department === department.name);
+
+    if (!department.isActive && (studentsUsingDept.length > 0 || mentorsUsingDept.length > 0)) {
+      // Reactivating department with existing data
+      if (!window.confirm(`Reactivating "${department.name}" will make ${studentsUsingDept.length} students and ${mentorsUsingDept.length} mentors visible again. Continue?`)) {
+        return;
+      }
+    } else if (department.isActive && (studentsUsingDept.length > 0 || mentorsUsingDept.length > 0)) {
+      // Deactivating department with existing data
+      if (!window.confirm(`Deactivating "${department.name}" will hide ${studentsUsingDept.length} students and ${mentorsUsingDept.length} mentors from most views. The data will be preserved but not visible. Continue?`)) {
+        return;
+      }
+    }
     const updatedDepartments = departments.map(dept =>
       dept.id === department.id
         ? { ...dept, isActive: !dept.isActive, updatedAt: new Date().toISOString() }

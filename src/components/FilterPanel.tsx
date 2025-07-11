@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, X, Users } from 'lucide-react';
+import { Search, Filter, X, Users, Eye, EyeOff } from 'lucide-react';
 import { FilterOptions } from '../types';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
@@ -11,8 +11,8 @@ interface FilterPanelProps {
 }
 
 const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, onClearFilters }) => {
-  const { students, showMyStudentsOnly, setShowMyStudentsOnly } = useData();
-  const { user, mentors } = useAuth();
+  const { students, showMyStudentsOnly, setShowMyStudentsOnly, showInactiveDepartments, setShowInactiveDepartments } = useData();
+  const { user, getActiveMentors } = useAuth();
 
   // Get unique values for dropdowns
   const departments = [...new Set(students.map(s => s.department))].sort();
@@ -21,7 +21,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, onC
   const years = [...new Set(students.filter(s => s.placementRecord).map(s => new Date(s.placementRecord!.placementDate).getFullYear().toString()))].sort().reverse();
   
   // Get active mentors for admin view
-  const activeMentors = user?.role === 'admin' ? mentors.filter(mentor => mentor.role === 'mentor' && mentor.isActive) : [];
+  const activeMentors = user?.role === 'admin' ? getActiveMentors().filter(mentor => mentor.role === 'mentor') : [];
 
   const statusOptions = [
     { value: 'placed', label: 'Placed' },
@@ -42,13 +42,16 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, onC
     setShowMyStudentsOnly(false);
   };
 
+  const handleToggleInactiveDepartments = () => {
+    setShowInactiveDepartments(!showInactiveDepartments);
+  };
   const hasActiveFilters = Object.values(filters).some(value => {
     if (typeof value === 'string') return value !== '';
     if (typeof value === 'object' && value !== null) {
       return Object.values(value).some(v => v !== '' && v !== 0);
     }
     return false;
-  }) || showMyStudentsOnly;
+  }) || showMyStudentsOnly || showInactiveDepartments;
 
   return (
     <div className="card mb-6">
@@ -79,6 +82,31 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, onC
                 }`}
               >
                 All Students
+              </button>
+            </div>
+          )}
+          {user?.role === 'admin' && (
+            <div className="ml-4 flex items-center space-x-2">
+              <span className="text-sm text-gray-600">Department Filter:</span>
+              <button
+                onClick={handleToggleInactiveDepartments}
+                className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                  showInactiveDepartments
+                    ? 'bg-orange-100 text-orange-800 border border-orange-200'
+                    : 'bg-green-100 text-green-800 border border-green-200'
+                }`}
+              >
+                {showInactiveDepartments ? (
+                  <>
+                    <Eye className="h-3 w-3 inline mr-1" />
+                    Show All Departments
+                  </>
+                ) : (
+                  <>
+                    <EyeOff className="h-3 w-3 inline mr-1" />
+                    Active Departments Only
+                  </>
+                )}
               </button>
             </div>
           )}
@@ -115,6 +143,30 @@ const FilterPanel: React.FC<FilterPanelProps> = ({ filters, onFiltersChange, onC
         </div>
       )}
 
+      {/* Status indicator for admins */}
+      {user?.role === 'admin' && (
+        <div className="mb-4 p-3 rounded-lg bg-gray-50 border border-gray-200">
+          <div className="flex items-center space-x-2">
+            {showInactiveDepartments ? (
+              <Eye className="h-4 w-4 text-orange-600" />
+            ) : (
+              <EyeOff className="h-4 w-4 text-green-600" />
+            )}
+            <span className="text-sm font-medium text-gray-800">
+              {showInactiveDepartments 
+                ? `Viewing students from all departments (including inactive)`
+                : `Viewing students from active departments only`
+              }
+            </span>
+          </div>
+          <p className="text-xs text-gray-600 mt-1">
+            {showInactiveDepartments 
+              ? 'Students from deactivated departments are visible. Toggle to hide them.'
+              : 'Students from deactivated departments are hidden. Toggle to show them.'
+            }
+          </p>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         {/* Search */}
         <div className="relative">
