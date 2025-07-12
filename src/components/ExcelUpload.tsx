@@ -116,32 +116,50 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onUpload }) => {
           <Info className="h-5 w-5 text-blue-600 mt-0.5" />
           <div className="text-sm text-blue-800">
             <p className="font-medium mb-2">Excel Import Format Requirements:</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-4">
               <div>
-                <p className="font-medium">Required Columns:</p>
-                <ul className="list-disc list-inside space-y-1 mt-1">
-                  <li>Roll Number</li>
-                  <li>Student Name</li>
-                  <li>Email</li>
-                  <li>Mobile Number</li>
-                  <li>Department</li>
-                  <li>10th Percentage</li>
-                  <li>12th Percentage</li>
-                  <li>UG Percentage</li>
-                </ul>
+                <p className="font-medium text-green-700">✅ Flexible Column Matching:</p>
+                <p className="text-sm mt-1">The system automatically detects columns regardless of order or exact naming. Missing data will be left empty and can be edited later.</p>
               </div>
-              <div>
-                <p className="font-medium">Optional Columns:</p>
-                <ul className="list-disc list-inside space-y-1 mt-1">
-                  <li>Mentor ID (2, 3, 4, or 5)</li>
-                  <li>Status (placed/eligible/higher_studies)</li>
-                  <li>Company (for placed students)</li>
-                  <li>Package (LPA)</li>
-                  <li>Placement Date</li>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="font-medium">Supported Column Names:</p>
+                  <div className="text-xs mt-2 space-y-1">
+                    <div><strong>Roll Number:</strong> "Roll Number", "Roll No", "Student ID", "ID"</div>
+                    <div><strong>Student Name:</strong> "Student Name", "Name", "Full Name"</div>
+                    <div><strong>Email:</strong> "Email", "Email Address", "E-mail"</div>
+                    <div><strong>Mobile:</strong> "Mobile Number", "Phone", "Contact"</div>
+                    <div><strong>Department:</strong> "Department", "Dept", "Branch"</div>
+                    <div><strong>Section:</strong> "Section", "Class"</div>
+                  </div>
+                </div>
+                <div>
+                  <p className="font-medium">Academic & Placement:</p>
+                  <div className="text-xs mt-2 space-y-1">
+                    <div><strong>10th %:</strong> "10th Percentage", "10th %", "Class 10", "SSC"</div>
+                    <div><strong>12th %:</strong> "12th Percentage", "12th %", "HSC", "Intermediate"</div>
+                    <div><strong>UG %:</strong> "UG Percentage", "UG %", "CGPA", "GPA"</div>
+                    <div><strong>Company:</strong> "Company", "Company Name", "Employer"</div>
+                    <div><strong>Package:</strong> "Package (LPA)", "Package", "Salary", "CTC"</div>
+                    <div><strong>Date:</strong> "Placement Date", "Joining Date"</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-green-50 border border-green-200 rounded p-3">
+                <p className="font-medium text-green-800">Smart Import Features:</p>
+                <ul className="list-disc list-inside text-xs mt-1 space-y-1 text-green-700">
+                  <li><strong>Any Column Order:</strong> Columns can be in any sequence</li>
+                  <li><strong>Flexible Naming:</strong> Multiple accepted names for each field</li>
+                  <li><strong>Missing Data OK:</strong> Empty fields will be left blank for later editing</li>
+                  <li><strong>Auto-Detection:</strong> System automatically maps your columns</li>
+                  <li><strong>Safe Import:</strong> Invalid data won't break the import process</li>
                 </ul>
               </div>
             </div>
-            <div className="mt-3 p-2 bg-blue-100 rounded">
+            
+            <div className="mt-4 p-3 bg-blue-100 rounded">
               <p className="font-medium">Eligibility Rules:</p>
               <p>Students with less than 60% in any of 10th, 12th, or UG will be automatically marked as ineligible for placement.</p>
             </div>
@@ -149,13 +167,24 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onUpload }) => {
         </div>
       </div>
 
-      <div className="mt-4 text-xs text-gray-500">
-        <p><strong>Mentor IDs:</strong></p>
-        <ul className="list-disc list-inside mt-1">
-          <li>2 - Dr. Rajesh Kumar</li>
-          <li>3 - Prof. Priya Sharma</li>
-          <li>4 - Dr. Amit Patel</li>
-          <li>5 - Prof. Sneha Gupta</li>
+      <div className="mt-4 p-3 bg-gray-50 rounded">
+        <p className="font-medium text-gray-700 mb-2">Example Excel Formats (All Valid):</p>
+        <div className="text-xs text-gray-600 space-y-1">
+          <div><strong>Format 1:</strong> Roll Number | Student Name | Email | Department | 10th % | 12th % | UG %</div>
+          <div><strong>Format 2:</strong> Name | Roll No | Phone | Dept | Class 10 | HSC | Graduation</div>
+          <div><strong>Format 3:</strong> ID | Full Name | E-mail | Branch | SSC | Intermediate | CGPA</div>
+          <p className="text-blue-600 mt-2">💡 <strong>Tip:</strong> Use any column names you prefer - the system will automatically match them!</p>
+        </div>
+      </div>
+
+      <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
+        <p className="font-medium text-yellow-800 mb-2">Default Values for Missing Data:</p>
+        <ul className="list-disc list-inside text-xs text-yellow-700 space-y-1">
+          <li><strong>Roll Number:</strong> Auto-generated if missing</li>
+          <li><strong>Section:</strong> Defaults to "A" if not provided</li>
+          <li><strong>Mentor:</strong> Assigned to first available mentor</li>
+          <li><strong>Academic %:</strong> Defaults to 0 if missing (can be edited later)</li>
+          <li><strong>Other Fields:</strong> Left empty for manual entry</li>
         </ul>
       </div>
     </div>

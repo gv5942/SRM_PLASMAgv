@@ -34,21 +34,82 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
+        // Define column mappings - multiple possible names for each field
+        const columnMappings = {
+          rollNumber: ['Roll Number', 'rollNumber', 'roll_number', 'Roll No', 'RollNumber', 'Student ID', 'ID'],
+          studentName: ['Student Name', 'studentName', 'student_name', 'Name', 'Full Name', 'StudentName'],
+          email: ['Email', 'email', 'Email Address', 'email_address', 'EmailAddress', 'E-mail'],
+          mobileNumber: ['Mobile Number', 'mobileNumber', 'mobile_number', 'Phone', 'phone', 'Mobile', 'Contact', 'Phone Number'],
+          department: ['Department', 'department', 'Dept', 'dept', 'Branch', 'branch'],
+          section: ['Section', 'section', 'Class', 'class'],
+          mentorId: ['Mentor ID', 'mentorId', 'mentor_id', 'Mentor', 'mentor', 'MentorID'],
+          tenthPercentage: ['10th Percentage', 'tenthPercentage', 'tenth_percentage', '10th %', '10th', 'Class 10', 'SSC'],
+          twelfthPercentage: ['12th Percentage', 'twelfthPercentage', 'twelfth_percentage', '12th %', '12th', 'Class 12', 'HSC', 'Intermediate'],
+          ugPercentage: ['UG Percentage', 'ugPercentage', 'ug_percentage', 'UG %', 'UG', 'Graduation', 'CGPA', 'GPA'],
+          status: ['Status', 'status', 'Placement Status', 'Student Status'],
+          company: ['Company', 'company', 'Company Name', 'Employer', 'Organization'],
+          package: ['Package (LPA)', 'package', 'Package', 'Salary', 'CTC', 'Annual Package', 'Package LPA'],
+          placementDate: ['Placement Date', 'placementDate', 'placement_date', 'Date of Placement', 'Joining Date']
+        };
+
+        // Function to find the correct column name from the Excel data
+        const findColumnName = (possibleNames: string[], excelColumns: string[]): string | null => {
+          for (const possibleName of possibleNames) {
+            const found = excelColumns.find(col => 
+              col.toLowerCase().trim() === possibleName.toLowerCase().trim()
+            );
+            if (found) return found;
+          }
+          return null;
+        };
+
+        // Get all column names from the Excel file
+        const excelColumns = jsonData.length > 0 ? Object.keys(jsonData[0]) : [];
+        
+        // Map Excel columns to our field names
+        const columnMap: Record<string, string | null> = {};
+        Object.entries(columnMappings).forEach(([fieldName, possibleNames]) => {
+          columnMap[fieldName] = findColumnName(possibleNames, excelColumns);
+        });
+
+        // Helper function to safely get value from row
+        const getValue = (row: any, fieldName: string): string => {
+          const columnName = columnMap[fieldName];
+          if (!columnName || !row[columnName]) return '';
+          return String(row[columnName]).trim();
+        };
+
+        // Helper function to safely parse number
+        const parseNumber = (value: string, defaultValue: number = 0): number => {
+          if (!value) return defaultValue;
+          const parsed = parseFloat(value);
+          return isNaN(parsed) ? defaultValue : parsed;
+        };
+
         const students: Student[] = jsonData.map((row: any, index: number) => {
-          // Extract academic details
-          const tenthPercentage = parseFloat(row['10th Percentage'] || row['tenthPercentage'] || '0');
-          const twelfthPercentage = parseFloat(row['12th Percentage'] || row['twelfthPercentage'] || '0');
-          const ugPercentage = parseFloat(row['UG Percentage'] || row['ugPercentage'] || '0');
+          // Extract data using flexible column matching
+          const rollNumber = getValue(row, 'rollNumber') || `IMP${Date.now()}${index}`;
+          const studentName = getValue(row, 'studentName');
+          const email = getValue(row, 'email');
+          const mobileNumber = getValue(row, 'mobileNumber');
+          const department = getValue(row, 'department');
+          const section = getValue(row, 'section') || 'A';
+          const mentorId = getValue(row, 'mentorId') || 'mentor_1_1'; // Default to first mentor
+          
+          // Extract academic details with safe parsing
+          const tenthPercentage = parseNumber(getValue(row, 'tenthPercentage'), 0);
+          const twelfthPercentage = parseNumber(getValue(row, 'twelfthPercentage'), 0);
+          const ugPercentage = parseNumber(getValue(row, 'ugPercentage'), 0);
 
           // Determine eligibility based on academic performance
           let status: 'placed' | 'eligible' | 'higher_studies' | 'ineligible' = 'eligible';
-          const importedStatus = row['Status'] || row['status'] || '';
+          const importedStatus = getValue(row, 'status').toLowerCase();
           
           if (tenthPercentage < 60 || twelfthPercentage < 60 || ugPercentage < 60) {
             status = 'ineligible';
-          } else if (importedStatus.toLowerCase() === 'higher_studies' || importedStatus.toLowerCase() === 'higher studies') {
+          } else if (importedStatus === 'higher_studies' || importedStatus === 'higher studies') {
             status = 'higher_studies';
-          } else if (importedStatus.toLowerCase() === 'placed') {
+          } else if (importedStatus === 'placed') {
             status = 'placed';
           } else {
             status = 'eligible';
@@ -56,13 +117,13 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
 
           const student: Student = {
             id: `import_${Date.now()}_${index}`,
-            rollNumber: row['Roll Number'] || row['rollNumber'] || `IMP${Date.now()}${index}`,
-            studentName: row['Student Name'] || row['studentName'] || '',
-            email: row['Email'] || row['email'] || row['Email Address'] || '',
-            mobileNumber: row['Mobile Number'] || row['mobileNumber'] || row['Phone'] || row['phone'] || '',
-            department: row['Department'] || row['department'] || '',
-            section: row['Section'] || row['section'] || 'A',
-            mentorId: row['Mentor ID'] || row['mentorId'] || '2', // Default to first mentor
+            rollNumber,
+            studentName,
+            email,
+            mobileNumber,
+            department,
+            section,
+            mentorId,
             academicDetails: {
               tenthPercentage,
               twelfthPercentage,
@@ -74,9 +135,9 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
           };
 
           // Add placement record if student is placed and has placement data
-          const company = row['Company'] || row['company'] || '';
-          const packageValue = parseFloat(row['Package (LPA)'] || row['package'] || '0');
-          const placementDate = row['Placement Date'] || row['placementDate'] || '';
+          const company = getValue(row, 'company');
+          const packageValue = parseNumber(getValue(row, 'package'), 0);
+          const placementDate = getValue(row, 'placementDate');
 
           if (status === 'placed' && company && packageValue > 0) {
             student.placementRecord = {
