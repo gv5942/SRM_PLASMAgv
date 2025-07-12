@@ -227,7 +227,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       updateMentor, 
       deleteMentor, 
       resetMentorPassword,
-      getMentorById 
+      getMentorById,
+      getActiveMentors
     }}>
       {children}
     </AuthContext.Provider>
