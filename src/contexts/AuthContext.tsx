@@ -15,7 +15,6 @@ interface AuthContextType {
   resetMentorPassword: (id: string, newPassword: string) => void;
   getMentorById: (id: string) => User | undefined;
   getActiveMentors: () => User[];
-}
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
