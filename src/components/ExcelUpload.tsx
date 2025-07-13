@@ -191,6 +191,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onUpload }) => {
           <li><strong>Academic Data:</strong> Defaults to 0 if missing (can be edited later)</li>
           <li><strong>Gender/DOB:</strong> Left empty if not provided</li>
           <li><strong>Links:</strong> Resume and photo links left empty if not provided</li>
+          <li><strong>Photos:</strong> Must be uploaded individually through the student edit form</li>
           <li><strong>Other Fields:</strong> Left empty for manual entry</li>
         </ul>
       </div>

@@ -142,7 +142,7 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
             dateOfBirth: dateOfBirth || undefined,
             numberOfBacklogs: numberOfBacklogs || undefined,
             resumeLink: resumeLink || undefined,
-            photoUrl: photoUrl || undefined,
+            photoUrl: undefined, // Photos will be uploaded separately through the UI
             mentorId,
             academicDetails: {
               tenthPercentage,
