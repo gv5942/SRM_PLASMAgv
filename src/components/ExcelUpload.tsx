@@ -126,20 +126,25 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onUpload }) => {
                 <div>
                   <p className="font-medium">Supported Column Names:</p>
                   <div className="text-xs mt-2 space-y-1">
-                    <div><strong>Roll Number:</strong> "Roll Number", "Roll No", "Student ID", "ID"</div>
-                    <div><strong>Student Name:</strong> "Student Name", "Name", "Full Name"</div>
-                    <div><strong>Email:</strong> "Email", "Email Address", "E-mail"</div>
-                    <div><strong>Mobile:</strong> "Mobile Number", "Phone", "Contact"</div>
-                    <div><strong>Department:</strong> "Department", "Dept", "Branch"</div>
-                    <div><strong>Section:</strong> "Section", "Class"</div>
+                    <div><strong>REG NO:</strong> "REG NO", "Roll Number", "Roll No", "Student ID", "ID"</div>
+                    <div><strong>NAME:</strong> "NAME", "Student Name", "Name", "Full Name"</div>
+                    <div><strong>Official Email:</strong> "OFFICIAL MAIL.ID", "Email", "Official Email"</div>
+                    <div><strong>Personal Email:</strong> "PERSONAL  MAIL ID", "Personal Email"</div>
+                    <div><strong>Mobile:</strong> "MOBILE NUMBER", "Mobile Number", "Phone"</div>
+                    <div><strong>Department:</strong> "DEPARTMENT", "Department", "Dept"</div>
+                    <div><strong>Gender:</strong> "GENDER", "Gender", "Sex"</div>
+                    <div><strong>DOB:</strong> "DOB", "Date of Birth", "Birth Date"</div>
                   </div>
                 </div>
                 <div>
-                  <p className="font-medium">Academic & Placement:</p>
+                  <p className="font-medium">Academic & Additional:</p>
                   <div className="text-xs mt-2 space-y-1">
                     <div><strong>10th %:</strong> "10th Percentage", "10th %", "Class 10", "SSC"</div>
                     <div><strong>12th %:</strong> "12th Percentage", "12th %", "HSC", "Intermediate"</div>
-                    <div><strong>UG %:</strong> "UG Percentage", "UG %", "CGPA", "GPA"</div>
+                    <div><strong>CGPA:</strong> "CGPA", "GPA", "UG Percentage", "Grade Point Average"</div>
+                    <div><strong>Backlogs:</strong> "NO OF BACKLOG", "Number of Backlogs", "Backlogs"</div>
+                    <div><strong>Resume:</strong> "RESUME LINK", "Resume Link", "CV Link"</div>
+                    <div><strong>Photo:</strong> "pHoto", "Photo URL", "Photo Link", "Image URL"</div>
                     <div><strong>Company:</strong> "Company", "Company Name", "Employer"</div>
                     <div><strong>Package:</strong> "Package (LPA)", "Package", "Salary", "CTC"</div>
                     <div><strong>Date:</strong> "Placement Date", "Joining Date"</div>
@@ -170,9 +175,9 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onUpload }) => {
       <div className="mt-4 p-3 bg-gray-50 rounded">
         <p className="font-medium text-gray-700 mb-2">Example Excel Formats (All Valid):</p>
         <div className="text-xs text-gray-600 space-y-1">
-          <div><strong>Format 1:</strong> Roll Number | Student Name | Email | Department | 10th % | 12th % | UG %</div>
-          <div><strong>Format 2:</strong> Name | Roll No | Phone | Dept | Class 10 | HSC | Graduation</div>
-          <div><strong>Format 3:</strong> ID | Full Name | E-mail | Branch | SSC | Intermediate | CGPA</div>
+          <div><strong>Format 1:</strong> REG NO | NAME | DEPARTMENT | GENDER | DOB | 10th % | 12th % | CGPA | NO OF BACKLOG | OFFICIAL MAIL.ID | PERSONAL  MAIL ID | MOBILE NUMBER | RESUME LINK | pHoto</div>
+          <div><strong>Format 2:</strong> Roll Number | Student Name | Email | Department | Gender | Date of Birth | 10th % | 12th % | CGPA | Backlogs | Resume Link | Photo URL</div>
+          <div><strong>Format 3:</strong> ID | Name | Official Email | Personal Email | Phone | Dept | Sex | Birth Date | Class 10 | HSC | GPA | CV Link</div>
           <p className="text-blue-600 mt-2">💡 <strong>Tip:</strong> Use any column names you prefer - the system will automatically match them!</p>
         </div>
       </div>
@@ -180,10 +185,12 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onUpload }) => {
       <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
         <p className="font-medium text-yellow-800 mb-2">Default Values for Missing Data:</p>
         <ul className="list-disc list-inside text-xs text-yellow-700 space-y-1">
-          <li><strong>Roll Number:</strong> Auto-generated if missing</li>
+          <li><strong>REG NO:</strong> Auto-generated if missing</li>
           <li><strong>Section:</strong> Defaults to "A" if not provided</li>
           <li><strong>Mentor:</strong> Assigned to first available mentor</li>
-          <li><strong>Academic %:</strong> Defaults to 0 if missing (can be edited later)</li>
+          <li><strong>Academic Data:</strong> Defaults to 0 if missing (can be edited later)</li>
+          <li><strong>Gender/DOB:</strong> Left empty if not provided</li>
+          <li><strong>Links:</strong> Resume and photo links left empty if not provided</li>
           <li><strong>Other Fields:</strong> Left empty for manual entry</li>
         </ul>
       </div>

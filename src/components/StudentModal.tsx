@@ -18,13 +18,20 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
     rollNumber: '',
     studentName: '',
     email: '',
+    personalEmail: '',
     mobileNumber: '',
     department: '',
     section: '',
+    gender: '' as 'Male' | 'Female' | 'Other' | '',
+    dateOfBirth: '',
+    numberOfBacklogs: '',
+    resumeLink: '',
+    photoUrl: '',
     mentorId: user?.role === 'mentor' ? user.id : '',
     tenthPercentage: '',
     twelfthPercentage: '',
     ugPercentage: '',
+    cgpa: '',
     status: 'eligible' as 'eligible' | 'ineligible' | 'higher_studies',
   });
 
@@ -43,13 +50,20 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
         rollNumber: student.rollNumber,
         studentName: student.studentName,
         email: student.email,
+        personalEmail: student.personalEmail || '',
         mobileNumber: student.mobileNumber,
         department: student.department,
         section: student.section,
+        gender: student.gender || '',
+        dateOfBirth: student.dateOfBirth || '',
+        numberOfBacklogs: student.numberOfBacklogs?.toString() || '',
+        resumeLink: student.resumeLink || '',
+        photoUrl: student.photoUrl || '',
         mentorId: student.mentorId,
         tenthPercentage: student.academicDetails.tenthPercentage.toString(),
         twelfthPercentage: student.academicDetails.twelfthPercentage.toString(),
         ugPercentage: student.academicDetails.ugPercentage.toString(),
+        cgpa: student.academicDetails.cgpa?.toString() || '',
         status: student.status === 'placed' ? 'eligible' : student.status,
       });
     } else {
@@ -57,13 +71,20 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
         rollNumber: '',
         studentName: '',
         email: '',
+        personalEmail: '',
         mobileNumber: '',
         department: '',
         section: '',
+        gender: '',
+        dateOfBirth: '',
+        numberOfBacklogs: '',
+        resumeLink: '',
+        photoUrl: '',
         mentorId: user?.role === 'mentor' ? user.id : '',
         tenthPercentage: '',
         twelfthPercentage: '',
         ugPercentage: '',
+        cgpa: '',
         status: 'eligible',
       });
     }
@@ -75,6 +96,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
     const tenthPercentage = parseFloat(formData.tenthPercentage);
     const twelfthPercentage = parseFloat(formData.twelfthPercentage);
     const ugPercentage = parseFloat(formData.ugPercentage);
+    const cgpa = formData.cgpa ? parseFloat(formData.cgpa) : undefined;
 
     // Determine eligibility based on academic performance
     let finalStatus = formData.status;
@@ -86,14 +108,21 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
       rollNumber: formData.rollNumber,
       studentName: formData.studentName,
       email: formData.email,
+      personalEmail: formData.personalEmail || undefined,
       mobileNumber: formData.mobileNumber,
       department: formData.department,
       section: formData.section,
+      gender: formData.gender || undefined,
+      dateOfBirth: formData.dateOfBirth || undefined,
+      numberOfBacklogs: formData.numberOfBacklogs ? parseInt(formData.numberOfBacklogs) : undefined,
+      resumeLink: formData.resumeLink || undefined,
+      photoUrl: formData.photoUrl || undefined,
       mentorId: formData.mentorId,
       academicDetails: {
         tenthPercentage,
         twelfthPercentage,
         ugPercentage,
+        cgpa,
       },
       status: finalStatus,
     });
@@ -160,7 +189,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address *
+                  Official Email Address *
                 </label>
                 <input
                   type="email"
@@ -169,6 +198,19 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   className="input-field"
                   placeholder="e.g., john.doe@student.university.edu"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Personal Email Address
+                </label>
+                <input
+                  type="email"
+                  value={formData.personalEmail}
+                  onChange={(e) => setFormData({ ...formData, personalEmail: e.target.value })}
+                  className="input-field"
+                  placeholder="e.g., john.personal@gmail.com"
                 />
               </div>
 
@@ -183,6 +225,35 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
                   onChange={(e) => setFormData({ ...formData, mobileNumber: e.target.value })}
                   className="input-field"
                   placeholder="e.g., +1-555-0123"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Gender
+                </label>
+                <select
+                  value={formData.gender}
+                  onChange={(e) => setFormData({ ...formData, gender: e.target.value as 'Male' | 'Female' | 'Other' | '' })}
+                  className="select-field"
+                  aria-label="Gender"
+                >
+                  <option value="">Select Gender</option>
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Date of Birth
+                </label>
+                <input
+                  type="date"
+                  value={formData.dateOfBirth}
+                  onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
+                  className="input-field"
                 />
               </div>
             </div>
@@ -252,7 +323,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
           {/* Academic Performance */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-3">Academic Performance</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   10th Percentage *
@@ -301,6 +372,68 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
                   onChange={(e) => setFormData({ ...formData, ugPercentage: e.target.value })}
                   className="input-field"
                   placeholder="e.g., 72.8"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  CGPA
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  max="10"
+                  value={formData.cgpa}
+                  onChange={(e) => setFormData({ ...formData, cgpa: e.target.value })}
+                  className="input-field"
+                  placeholder="e.g., 8.5"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Additional Information */}
+          <div>
+            <h3 className="text-lg font-medium text-gray-900 mb-3">Additional Information</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Number of Backlogs
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={formData.numberOfBacklogs}
+                  onChange={(e) => setFormData({ ...formData, numberOfBacklogs: e.target.value })}
+                  className="input-field"
+                  placeholder="e.g., 0"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Resume Link
+                </label>
+                <input
+                  type="url"
+                  value={formData.resumeLink}
+                  onChange={(e) => setFormData({ ...formData, resumeLink: e.target.value })}
+                  className="input-field"
+                  placeholder="e.g., https://drive.google.com/file/d/..."
+                />
+              </div>
+
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Photo URL
+                </label>
+                <input
+                  type="url"
+                  value={formData.photoUrl}
+                  onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
+                  className="input-field"
+                  placeholder="e.g., https://example.com/photos/student.jpg"
                 />
               </div>
             </div>

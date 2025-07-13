@@ -39,13 +39,20 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
           rollNumber: ['Roll Number', 'rollNumber', 'roll_number', 'Roll No', 'RollNumber', 'Student ID', 'ID'],
           studentName: ['Student Name', 'studentName', 'student_name', 'Name', 'Full Name', 'StudentName'],
           email: ['Email', 'email', 'Email Address', 'email_address', 'EmailAddress', 'E-mail'],
+          personalEmail: ['Personal Email', 'personalEmail', 'personal_email', 'Personal Mail', 'PERSONAL  MAIL ID', 'Personal Mail ID', 'Personal E-mail'],
           mobileNumber: ['Mobile Number', 'mobileNumber', 'mobile_number', 'Phone', 'phone', 'Mobile', 'Contact', 'Phone Number'],
           department: ['Department', 'department', 'Dept', 'dept', 'Branch', 'branch'],
           section: ['Section', 'section', 'Class', 'class'],
+          gender: ['Gender', 'gender', 'GENDER', 'Sex'],
+          dateOfBirth: ['Date of Birth', 'dateOfBirth', 'date_of_birth', 'DOB', 'Birth Date', 'Date Of Birth'],
+          numberOfBacklogs: ['Number of Backlogs', 'numberOfBacklogs', 'number_of_backlogs', 'Backlogs', 'NO OF BACKLOG', 'No of Backlogs', 'Backlog Count'],
+          resumeLink: ['Resume Link', 'resumeLink', 'resume_link', 'Resume URL', 'RESUME LINK', 'CV Link', 'Resume'],
+          photoUrl: ['Photo URL', 'photoUrl', 'photo_url', 'Photo Link', 'pHoto', 'Photo', 'Image URL', 'Picture'],
           mentorId: ['Mentor ID', 'mentorId', 'mentor_id', 'Mentor', 'mentor', 'MentorID'],
           tenthPercentage: ['10th Percentage', 'tenthPercentage', 'tenth_percentage', '10th %', '10th', 'Class 10', 'SSC'],
           twelfthPercentage: ['12th Percentage', 'twelfthPercentage', 'twelfth_percentage', '12th %', '12th', 'Class 12', 'HSC', 'Intermediate'],
           ugPercentage: ['UG Percentage', 'ugPercentage', 'ug_percentage', 'UG %', 'UG', 'Graduation', 'CGPA', 'GPA'],
+          cgpa: ['CGPA', 'cgpa', 'GPA', 'gpa', 'Grade Point Average', 'Cumulative GPA'],
           status: ['Status', 'status', 'Placement Status', 'Student Status'],
           company: ['Company', 'company', 'Company Name', 'Employer', 'Organization'],
           package: ['Package (LPA)', 'package', 'Package', 'Salary', 'CTC', 'Annual Package', 'Package LPA'],
@@ -91,15 +98,22 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
           const rollNumber = getValue(row, 'rollNumber') || `IMP${Date.now()}${index}`;
           const studentName = getValue(row, 'studentName');
           const email = getValue(row, 'email');
+          const personalEmail = getValue(row, 'personalEmail');
           const mobileNumber = getValue(row, 'mobileNumber');
           const department = getValue(row, 'department');
           const section = getValue(row, 'section') || 'A';
+          const gender = getValue(row, 'gender') as 'Male' | 'Female' | 'Other' | undefined;
+          const dateOfBirth = getValue(row, 'dateOfBirth');
+          const numberOfBacklogs = parseNumber(getValue(row, 'numberOfBacklogs'), 0);
+          const resumeLink = getValue(row, 'resumeLink');
+          const photoUrl = getValue(row, 'photoUrl');
           const mentorId = getValue(row, 'mentorId') || 'mentor_1_1'; // Default to first mentor
           
           // Extract academic details with safe parsing
           const tenthPercentage = parseNumber(getValue(row, 'tenthPercentage'), 0);
           const twelfthPercentage = parseNumber(getValue(row, 'twelfthPercentage'), 0);
           const ugPercentage = parseNumber(getValue(row, 'ugPercentage'), 0);
+          const cgpa = parseNumber(getValue(row, 'cgpa'), 0);
 
           // Determine eligibility based on academic performance
           let status: 'placed' | 'eligible' | 'higher_studies' | 'ineligible' = 'eligible';
@@ -120,14 +134,21 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
             rollNumber,
             studentName,
             email,
+            personalEmail: personalEmail || undefined,
             mobileNumber,
             department,
             section,
+            gender: gender || undefined,
+            dateOfBirth: dateOfBirth || undefined,
+            numberOfBacklogs: numberOfBacklogs || undefined,
+            resumeLink: resumeLink || undefined,
+            photoUrl: photoUrl || undefined,
             mentorId,
             academicDetails: {
               tenthPercentage,
               twelfthPercentage,
               ugPercentage,
+              cgpa: cgpa || undefined,
             },
             status,
             createdAt: new Date().toISOString(),
@@ -183,13 +204,19 @@ export const generateExcelTemplate = (departmentNames?: string[]) => {
       'Roll Number': '2024CS001',
       'Student Name': 'John Doe',
       'Email': 'john.doe@student.university.edu',
+      'PERSONAL  MAIL ID': 'john.personal@gmail.com',
       'Mobile Number': '+1-555-0123',
       'Department': departments[0],
       'Section': 'A',
+      'GENDER': 'Male',
+      'DOB': '2002-05-15',
+      'NO OF BACKLOG': '0',
+      'RESUME LINK': 'https://drive.google.com/file/d/sample-resume',
+      'pHoto': 'https://example.com/photos/john.jpg',
       'Mentor ID': '2',
       '10th Percentage': '85.5',
       '12th Percentage': '78.2',
-      'UG Percentage': '72.8',
+      'CGPA': '8.2',
       'Status': 'placed',
       'Company': 'Google',
       'Package (LPA)': '15.5',
@@ -199,13 +226,19 @@ export const generateExcelTemplate = (departmentNames?: string[]) => {
       'Roll Number': '2024IT002',
       'Student Name': 'Jane Smith',
       'Email': 'jane.smith@student.university.edu',
+      'PERSONAL  MAIL ID': 'jane.personal@gmail.com',
       'Mobile Number': '+1-555-0124',
       'Department': departments[1] || 'Information Technology',
       'Section': 'B',
+      'GENDER': 'Female',
+      'DOB': '2002-08-22',
+      'NO OF BACKLOG': '1',
+      'RESUME LINK': 'https://drive.google.com/file/d/sample-resume-2',
+      'pHoto': 'https://example.com/photos/jane.jpg',
       'Mentor ID': '3',
       '10th Percentage': '92.0',
       '12th Percentage': '88.5',
-      'UG Percentage': '85.2',
+      'CGPA': '9.1',
       'Status': 'eligible',
       'Company': '',
       'Package (LPA)': '',
@@ -215,13 +248,19 @@ export const generateExcelTemplate = (departmentNames?: string[]) => {
       'Roll Number': '2024ME003',
       'Student Name': 'Mike Johnson',
       'Email': 'mike.johnson@student.university.edu',
+      'PERSONAL  MAIL ID': 'mike.personal@gmail.com',
       'Mobile Number': '+1-555-0125',
       'Department': departments[2] || 'Mechanical Engineering',
       'Section': 'C',
+      'GENDER': 'Male',
+      'DOB': '2001-12-10',
+      'NO OF BACKLOG': '0',
+      'RESUME LINK': 'https://drive.google.com/file/d/sample-resume-3',
+      'pHoto': 'https://example.com/photos/mike.jpg',
       'Mentor ID': '4',
       '10th Percentage': '65.0',
       '12th Percentage': '70.5',
-      'UG Percentage': '68.8',
+      'CGPA': '7.5',
       'Status': 'higher_studies',
       'Company': '',
       'Package (LPA)': '',

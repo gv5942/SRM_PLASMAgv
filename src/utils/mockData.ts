@@ -87,6 +87,14 @@ function generateEmail(firstName: string, lastName: string, rollNumber: string):
   return `${cleanFirstName}.${cleanLastName}@student.university.edu`;
 }
 
+function generatePersonalEmail(firstName: string, lastName: string): string {
+  const cleanFirstName = firstName.toLowerCase().replace(/\s+/g, '');
+  const cleanLastName = lastName.toLowerCase().replace(/\s+/g, '');
+  const domains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com'];
+  const domain = domains[Math.floor(Math.random() * domains.length)];
+  return `${cleanFirstName}.${cleanLastName}@${domain}`;
+}
+
 function generateMobileNumber(): string {
   const areaCode = Math.floor(Math.random() * 900) + 100;
   const exchange = Math.floor(Math.random() * 900) + 100;
@@ -116,12 +124,19 @@ export function generateMockStudents(mentorIds?: string[]): Student[] {
     const mentorId = getRandomElement(availableMentorIds);
     const rollNumber = generateRollNumber(department, currentYear, i + 1);
     const email = generateEmail(firstName, lastName, rollNumber);
+    const personalEmail = generatePersonalEmail(firstName, lastName);
     const mobileNumber = generateMobileNumber();
+    const gender = Math.random() > 0.5 ? 'Male' : 'Female';
+    const dateOfBirth = new Date(2000 + Math.floor(Math.random() * 4), Math.floor(Math.random() * 12), Math.floor(Math.random() * 28) + 1).toISOString().split('T')[0];
+    const numberOfBacklogs = Math.random() > 0.8 ? Math.floor(Math.random() * 3) : 0;
+    const resumeLink = `https://drive.google.com/file/d/sample-resume-${i + 1}`;
+    const photoUrl = `https://example.com/photos/student-${i + 1}.jpg`;
     
     const academicDetails = {
       tenthPercentage: getRandomPercentage(50, 95),
       twelfthPercentage: getRandomPercentage(50, 95),
       ugPercentage: getRandomPercentage(55, 90),
+      cgpa: Math.round((Math.random() * 4 + 6) * 100) / 100, // CGPA between 6.0 and 10.0
     };
 
     // Determine status based on eligibility and random factors
@@ -146,9 +161,15 @@ export function generateMockStudents(mentorIds?: string[]): Student[] {
       rollNumber,
       studentName: `${firstName} ${lastName}`,
       email,
+      personalEmail,
       mobileNumber,
       department,
       section: getRandomSection(),
+      gender,
+      dateOfBirth,
+      numberOfBacklogs,
+      resumeLink,
+      photoUrl,
       mentorId,
       academicDetails,
       status,

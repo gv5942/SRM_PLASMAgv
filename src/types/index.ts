@@ -16,14 +16,21 @@ export interface Student {
   rollNumber: string;
   studentName: string;
   email: string;
+  personalEmail?: string;
   mobileNumber: string;
   department: string;
   section: string;
   mentorId: string;
+  gender?: 'Male' | 'Female' | 'Other';
+  dateOfBirth?: string;
+  numberOfBacklogs?: number;
+  resumeLink?: string;
+  photoUrl?: string;
   academicDetails: {
     tenthPercentage: number;
     twelfthPercentage: number;
     ugPercentage: number;
+    cgpa?: number;
   };
   status: 'placed' | 'eligible' | 'higher_studies' | 'ineligible';
   placementRecord?: PlacementRecord;

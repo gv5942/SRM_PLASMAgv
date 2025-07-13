@@ -178,10 +178,21 @@ const DataTable: React.FC<DataTableProps> = ({ data, onEdit, onDelete, onAddPlac
                         <Mail className="h-3 w-3" />
                         <span>{student.email}</span>
                       </div>
+                      {student.personalEmail && (
+                        <div className="flex items-center space-x-1">
+                          <Mail className="h-3 w-3 text-blue-500" />
+                          <span className="text-blue-600">{student.personalEmail}</span>
+                        </div>
+                      )}
                       <div className="flex items-center space-x-1">
                         <Phone className="h-3 w-3" />
                         <span>{student.mobileNumber}</span>
                       </div>
+                      {student.gender && (
+                        <div className="text-xs text-gray-500">
+                          {student.gender} {student.dateOfBirth && `• ${new Date(student.dateOfBirth).toLocaleDateString()}`}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </td>
@@ -201,6 +212,14 @@ const DataTable: React.FC<DataTableProps> = ({ data, onEdit, onDelete, onAddPlac
                     <div>10th: {student.academicDetails.tenthPercentage}%</div>
                     <div>12th: {student.academicDetails.twelfthPercentage}%</div>
                     <div>UG: {student.academicDetails.ugPercentage}%</div>
+                    {student.academicDetails.cgpa && (
+                      <div>CGPA: {student.academicDetails.cgpa}</div>
+                    )}
+                    {student.numberOfBacklogs !== undefined && (
+                      <div className={`${student.numberOfBacklogs > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                        Backlogs: {student.numberOfBacklogs}
+                      </div>
+                    )}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
@@ -223,6 +242,18 @@ const DataTable: React.FC<DataTableProps> = ({ data, onEdit, onDelete, onAddPlac
                     >
                       <Eye className="h-4 w-4" />
                     </button>
+                    
+                    {student.resumeLink && (
+                      <a
+                        href={student.resumeLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-green-600 hover:text-green-900 transition-colors"
+                        title="View Resume"
+                      >
+                        📄
+                      </a>
+                    )}
                     
                     {canEditStudent(student) && (
                       <>
@@ -333,10 +364,28 @@ const DataTable: React.FC<DataTableProps> = ({ data, onEdit, onDelete, onAddPlac
                       <label className="block text-sm font-medium text-gray-700">Email</label>
                       <p className="mt-1 text-sm text-gray-900">{viewingStudent.email}</p>
                     </div>
+                    {viewingStudent.personalEmail && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Personal Email</label>
+                        <p className="mt-1 text-sm text-gray-900">{viewingStudent.personalEmail}</p>
+                      </div>
+                    )}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Mobile Number</label>
                       <p className="mt-1 text-sm text-gray-900">{viewingStudent.mobileNumber}</p>
                     </div>
+                    {viewingStudent.gender && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Gender</label>
+                        <p className="mt-1 text-sm text-gray-900">{viewingStudent.gender}</p>
+                      </div>
+                    )}
+                    {viewingStudent.dateOfBirth && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">Date of Birth</label>
+                        <p className="mt-1 text-sm text-gray-900">{new Date(viewingStudent.dateOfBirth).toLocaleDateString()}</p>
+                      </div>
+                    )}
                     <div>
                       <label className="block text-sm font-medium text-gray-700">Department</label>
                       <p className="mt-1 text-sm text-gray-900">{viewingStudent.department}</p>
@@ -355,7 +404,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, onEdit, onDelete, onAddPlac
                 {/* Academic Details */}
                 <div>
                   <h3 className="text-lg font-medium text-gray-900 mb-3">Academic Performance</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700">10th Percentage</label>
                       <p className="mt-1 text-sm text-gray-900">{viewingStudent.academicDetails.tenthPercentage}%</p>
@@ -368,8 +417,59 @@ const DataTable: React.FC<DataTableProps> = ({ data, onEdit, onDelete, onAddPlac
                       <label className="block text-sm font-medium text-gray-700">UG Percentage</label>
                       <p className="mt-1 text-sm text-gray-900">{viewingStudent.academicDetails.ugPercentage}%</p>
                     </div>
+                    {viewingStudent.academicDetails.cgpa && (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700">CGPA</label>
+                        <p className="mt-1 text-sm text-gray-900">{viewingStudent.academicDetails.cgpa}</p>
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                {/* Additional Information */}
+                {(viewingStudent.numberOfBacklogs !== undefined || viewingStudent.resumeLink || viewingStudent.photoUrl) && (
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-3">Additional Information</h3>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {viewingStudent.numberOfBacklogs !== undefined && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Number of Backlogs</label>
+                          <p className={`mt-1 text-sm font-medium ${viewingStudent.numberOfBacklogs > 0 ? 'text-red-600' : 'text-green-600'}`}>
+                            {viewingStudent.numberOfBacklogs}
+                          </p>
+                        </div>
+                      )}
+                      {viewingStudent.resumeLink && (
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700">Resume</label>
+                          <a 
+                            href={viewingStudent.resumeLink} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="mt-1 text-sm text-blue-600 hover:text-blue-800 underline"
+                          >
+                            View Resume
+                          </a>
+                        </div>
+                      )}
+                      {viewingStudent.photoUrl && (
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-gray-700">Photo</label>
+                          <div className="mt-2">
+                            <img 
+                              src={viewingStudent.photoUrl} 
+                              alt={`${viewingStudent.studentName}'s photo`}
+                              className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                              onError={(e) => {
+                                e.currentTarget.style.display = 'none';
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Placement Details */}
                 {viewingStudent.placementRecord && (
