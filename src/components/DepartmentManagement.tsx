@@ -422,9 +422,8 @@ const DepartmentManagement: React.FC = () => {
                           onClick={() => handleDeleteDepartment(department)}
                           className="text-red-600 hover:text-red-900 transition-colors"
                           title="Delete Department"
-                          disabled={studentsCount > 0 || mentorsCount > 0}
                         >
-                          <Trash2 className={`h-4 w-4 ${studentsCount > 0 || mentorsCount > 0 ? 'opacity-50 cursor-not-allowed' : ''}`} />
+                          <Trash2 className="h-4 w-4" />
                         </button>
                       </div>
                     </td>
