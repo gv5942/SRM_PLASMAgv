@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import { X, Upload, Trash2 } from 'lucide-react';
 import { Student } from '../types';
 import { useAuth } from '../contexts/AuthContext';
 import { useDepartments } from '../utils/departmentUtils';
@@ -26,7 +26,6 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
     dateOfBirth: '',
     numberOfBacklogs: '',
     resumeLink: '',
-    photoUrl: '',
     mentorId: user?.role === 'mentor' ? user.id : '',
     tenthPercentage: '',
     twelfthPercentage: '',
@@ -34,6 +33,10 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
     cgpa: '',
     status: 'eligible' as 'eligible' | 'ineligible' | 'higher_studies',
   });
+  
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string>('');
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
 
   const activeMentors = mentors.filter(mentor => mentor.role === 'mentor' && mentor.isActive);
 
@@ -58,7 +61,6 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
         dateOfBirth: student.dateOfBirth || '',
         numberOfBacklogs: student.numberOfBacklogs?.toString() || '',
         resumeLink: student.resumeLink || '',
-        photoUrl: student.photoUrl || '',
         mentorId: student.mentorId,
         tenthPercentage: student.academicDetails.tenthPercentage.toString(),
         twelfthPercentage: student.academicDetails.twelfthPercentage.toString(),
@@ -66,6 +68,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
         cgpa: student.academicDetails.cgpa?.toString() || '',
         status: student.status === 'placed' ? 'eligible' : student.status,
       });
+      setPhotoPreview(student.photoUrl || '');
     } else {
       setFormData({
         rollNumber: '',
@@ -79,7 +82,6 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
         dateOfBirth: '',
         numberOfBacklogs: '',
         resumeLink: '',
-        photoUrl: '',
         mentorId: user?.role === 'mentor' ? user.id : '',
         tenthPercentage: '',
         twelfthPercentage: '',
@@ -87,12 +89,72 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
         cgpa: '',
         status: 'eligible',
       });
+      setPhotoFile(null);
+      setPhotoPreview('');
     }
   }, [student, isOpen, user]);
+
+  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file (JPG, PNG, GIF, etc.)');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Photo size must be less than 5MB');
+        return;
+      }
+      
+      setPhotoFile(file);
+      
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setPhotoPreview(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+  
+  const handleRemovePhoto = () => {
+    setPhotoFile(null);
+    setPhotoPreview('');
+  };
+  
+  const uploadPhotoToStorage = async (file: File): Promise<string> => {
+    // Simulate photo upload - in real app, upload to cloud storage
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        // Generate a mock URL - in real app, this would be the actual uploaded URL
+        const mockUrl = `https://storage.example.com/photos/${Date.now()}_${file.name}`;
+        resolve(mockUrl);
+      }, 1000);
+    });
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    const submitForm = async () => {
+      setIsUploadingPhoto(true);
+      
+      let photoUrl = photoPreview;
+      
+      // Upload photo if a new file is selected
+      if (photoFile) {
+        try {
+          photoUrl = await uploadPhotoToStorage(photoFile);
+        } catch (error) {
+          alert('Failed to upload photo. Please try again.');
+          setIsUploadingPhoto(false);
+          return;
+        }
+      }
+      
     const tenthPercentage = parseFloat(formData.tenthPercentage);
     const twelfthPercentage = parseFloat(formData.twelfthPercentage);
     const ugPercentage = parseFloat(formData.ugPercentage);
@@ -116,7 +178,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
       dateOfBirth: formData.dateOfBirth || undefined,
       numberOfBacklogs: formData.numberOfBacklogs ? parseInt(formData.numberOfBacklogs) : undefined,
       resumeLink: formData.resumeLink || undefined,
-      photoUrl: formData.photoUrl || undefined,
+      photoUrl: photoUrl || undefined,
       mentorId: formData.mentorId,
       academicDetails: {
         tenthPercentage,
@@ -126,7 +188,12 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
       },
       status: finalStatus,
     });
+      
+      setIsUploadingPhoto(false);
     onClose();
+    };
+    
+    submitForm();
   };
 
   if (!isOpen) return null;
@@ -426,15 +493,50 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Photo URL
+                  Student Photo
                 </label>
-                <input
-                  type="url"
-                  value={formData.photoUrl}
-                  onChange={(e) => setFormData({ ...formData, photoUrl: e.target.value })}
-                  className="input-field"
-                  placeholder="e.g., https://example.com/photos/student.jpg"
-                />
+                <div className="space-y-3">
+                  {photoPreview && (
+                    <div className="flex items-center space-x-3">
+                      <img 
+                        src={photoPreview} 
+                        alt="Student photo preview"
+                        className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                        onError={(e) => {
+                          e.currentTarget.style.display = 'none';
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={handleRemovePhoto}
+                        className="text-red-600 hover:text-red-800 transition-colors"
+                        title="Remove Photo"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center space-x-3">
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handlePhotoUpload}
+                      className="hidden"
+                      id="photo-upload"
+                    />
+                    <label
+                      htmlFor="photo-upload"
+                      className="btn-secondary flex items-center space-x-2 cursor-pointer"
+                    >
+                      <Upload className="h-4 w-4" />
+                      <span>{photoPreview ? 'Change Photo' : 'Upload Photo'}</span>
+                    </label>
+                    <span className="text-xs text-gray-500">
+                      Max 5MB • JPG, PNG, GIF
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -472,9 +574,10 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
             </button>
             <button
               type="submit"
+              disabled={isUploadingPhoto}
               className="btn-primary flex-1"
             >
-              {student ? 'Update' : 'Add'} Student
+              {isUploadingPhoto ? 'Uploading...' : (student ? 'Update' : 'Add')} Student
             </button>
           </div>
         </form>

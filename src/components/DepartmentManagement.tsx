@@ -206,14 +206,27 @@ const DepartmentManagement: React.FC = () => {
     const mentorsUsingDept = mentors.filter(mentor => mentor.department === department.name);
 
     if (studentsUsingDept.length > 0 || mentorsUsingDept.length > 0) {
-      const message = `Cannot delete department "${department.name}" because it is assigned to ${studentsUsingDept.length} students and ${mentorsUsingDept.length} mentors.\n\nOptions:\n1. Reassign all students and mentors to other departments first\n2. Deactivate the department instead (data will be hidden but preserved)`;
-      alert(message);
-      return;
+      const confirmMessage = `Department "${department.name}" is currently assigned to:\n• ${studentsUsingDept.length} students\n• ${mentorsUsingDept.length} mentors\n\nDeleting this department will:\n1. Remove the department permanently\n2. Keep all student and mentor data intact\n3. Students/mentors will show their department name even though department is deleted\n\nRecommended: Deactivate instead of delete to preserve data integrity.\n\nDo you still want to DELETE this department permanently?`;
+      
+      if (!window.confirm(confirmMessage)) {
+        return;
+      }
+    } else {
+      if (!window.confirm(`Are you sure you want to delete the department "${department.name}"? This action cannot be undone.`)) {
+        return;
+      }
     }
 
-    if (window.confirm(`Are you sure you want to delete the department "${department.name}"? This action cannot be undone.`)) {
+    // Proceed with deletion
+    try {
       const updatedDepartments = departments.filter(dept => dept.id !== department.id);
       updateEnvironment(currentEnvironment.id, { departments: updatedDepartments });
+      
+      // Show success message
+      alert(`Department "${department.name}" has been deleted successfully.`);
+    } catch (error) {
+      console.error('Error deleting department:', error);
+      alert('An error occurred while deleting the department. Please try again.');
     }
   };
 
