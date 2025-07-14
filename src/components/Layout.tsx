@@ -45,7 +45,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     Mentee
                   </span>
                   <span className="text-cyan-500 font-black tracking-widest drop-shadow-lg">
-                    PlASMA
+                    Elevatr 360
                   </span>
                 </span>
                 <span className="text-xs text-gray-500 -mt-1">University Placement Dashboard</span>
