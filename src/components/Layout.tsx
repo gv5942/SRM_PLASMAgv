@@ -42,7 +42,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="flex flex-col">
                 <span className="text-xl font-extrabold flex items-center space-x-2">
                   <span className="bg-gradient-to-r from-blue-800 via-blue-500 to-cyan-400 bg-clip-text text-transparent drop-shadow-xl">
-                    SRM
+                    Mentee
                   </span>
                   <span className="text-cyan-500 font-black tracking-widest drop-shadow-lg">
                     PlASMA
