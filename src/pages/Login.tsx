@@ -82,10 +82,10 @@ const Login: React.FC = () => {
             {/* Dual blue color platform name */}
             <h1 className="text-4xl font-extrabold flex items-center justify-center space-x-3">
               <span className="bg-gradient-to-r from-blue-800 via-blue-500 to-cyan-400 bg-clip-text text-transparent drop-shadow-xl animate-gradient-x">
-              SRM
+              Mentee 
               </span>
               <span className="text-cyan-500 font-black tracking-widest drop-shadow-lg">
-              PlASMA
+              Elevatr 360
               </span>
             </h1>
           </div>
