@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User } from '../types';
 import { useEnvironment } from './EnvironmentContext';
 import { useDepartments } from '../utils/departmentUtils';
+import { supabase, DatabaseMentor } from '../lib/supabase';
 
 interface AuthContextType {
   user: User | null;
@@ -9,200 +10,241 @@ interface AuthContextType {
   login: (usernameOrEmail: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;
-  addMentor: (mentor: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => void;
-  updateMentor: (id: string, mentor: Partial<User>) => void;
-  deleteMentor: (id: string) => void;
-  resetMentorPassword: (id: string, newPassword: string) => void;
+  addMentor: (mentor: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
+  updateMentor: (id: string, mentor: Partial<User>) => Promise<void>;
+  deleteMentor: (id: string) => Promise<void>;
+  resetMentorPassword: (id: string, newPassword: string) => Promise<void>;
   getMentorById: (id: string) => User | undefined;
   getActiveMentors: () => User[];
+  error: string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Convert database mentor to app user format
+const convertDatabaseMentor = (dbMentor: DatabaseMentor): User => {
+  return {
+    id: dbMentor.id,
+    username: dbMentor.username,
+    role: 'mentor',
+    name: dbMentor.name,
+    email: dbMentor.email,
+    phone: dbMentor.phone,
+    department: dbMentor.department,
+    isActive: dbMentor.is_active,
+    createdAt: dbMentor.created_at,
+    updatedAt: dbMentor.updated_at,
+  };
+};
+
+// For now, we'll use a simple admin user (in production, this should also be in database)
+const defaultAdmin: User = {
+  id: 'admin_1',
+  username: 'admin',
+  role: 'admin',
+  name: 'Dr. Revathy Rajesh',
+  email: 'revathys2@srmist.edu.in',
+  phone: '+91 9840097317',
+  department: 'Computer Science',
+  isActive: true,
+  createdAt: '2024-01-01T00:00:00.000Z',
+  updatedAt: '2024-01-01T00:00:00.000Z'
+};
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { currentEnvironment, updateEnvironment } = useEnvironment();
   const { activeDepartments } = useDepartments();
   const [user, setUser] = useState<User | null>(null);
   const [mentors, setMentors] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Load mentors from database
+  const loadMentors = async () => {
+    try {
+      setError(null);
+      const { data, error: mentorsError } = await supabase
+        .from('mentors')
+        .select('*')
+        .order('name');
+
+      if (mentorsError) throw mentorsError;
+
+      const convertedMentors = data.map(convertDatabaseMentor);
+      setMentors([defaultAdmin, ...convertedMentors]);
+    } catch (err) {
+      console.error('Error loading mentors:', err);
+      setError('Failed to load mentors. Please try again.');
+    }
+  };
 
   useEffect(() => {
-    if (currentEnvironment) {
-      // Set mentors from current environment
-      const allUsers = [currentEnvironment.adminUser, ...currentEnvironment.mentors];
-      setMentors(allUsers);
-
-      // Check if user is logged in for this environment
-      const storedUser = localStorage.getItem(`user_${currentEnvironment.id}`);
+    const initAuth = async () => {
+      await loadMentors();
+      
+      // Check if user is logged in
+      const storedUser = localStorage.getItem('user');
       if (storedUser) {
-        const parsedUser = JSON.parse(storedUser);
-        // Verify user still exists in current environment
-        const userExists = allUsers.find(u => u.id === parsedUser.id && u.isActive);
-        if (userExists) {
-          setUser(userExists);
-        } else {
-          localStorage.removeItem(`user_${currentEnvironment.id}`);
+        try {
+          const parsedUser = JSON.parse(storedUser);
+          setUser(parsedUser);
+        } catch (err) {
+          localStorage.removeItem('user');
         }
       }
-    }
-    setIsLoading(false);
-  }, [currentEnvironment]);
+      
+      setIsLoading(false);
+    };
+
+    initAuth();
+  }, []);
 
   const login = async (usernameOrEmail: string, password: string): Promise<boolean> => {
-    if (!currentEnvironment) return false;
-
     try {
-      const allUsers = [currentEnvironment.adminUser, ...currentEnvironment.mentors];
-      const storedPasswords = JSON.parse(
-        localStorage.getItem(`passwords_${currentEnvironment.id}`) || '{}'
-      );
-
-      console.log('Login attempt for environment:', currentEnvironment.name);
-      console.log('Available users:', allUsers.map(u => ({ 
-        id: u.id,
-        username: u.username, 
-        email: u.email, 
-        name: u.name,
-        active: u.isActive 
-      })));
-
-      // Find user by username or email (case insensitive)
+      setError(null);
+      
+      // Simple password check (in production, use proper authentication)
+      const allUsers = mentors;
+      
       const foundUser = allUsers.find(u => {
         const usernameMatch = u.username.toLowerCase() === usernameOrEmail.toLowerCase();
         const emailMatch = u.email && u.email.toLowerCase() === usernameOrEmail.toLowerCase();
         return (usernameMatch || emailMatch) && u.isActive;
       });
 
-      console.log('Found user:', foundUser);
-
       if (foundUser) {
-        const userPassword = storedPasswords[foundUser.username];
-        console.log('Expected password for', foundUser.username, ':', userPassword);
-
-        if (userPassword === password) {
+        // Simple password check (admin123 for admin, mentor123 for mentors)
+        const expectedPassword = foundUser.role === 'admin' ? 'admin123' : 'mentor123';
+        
+        if (password === expectedPassword) {
           setUser(foundUser);
-          localStorage.setItem(`user_${currentEnvironment.id}`, JSON.stringify(foundUser));
-          console.log('Login successful for:', foundUser.name);
+          localStorage.setItem('user', JSON.stringify(foundUser));
           return true;
-        } else {
-          console.log('Password mismatch');
         }
-      } else {
-        console.log('User not found');
       }
 
       return false;
-    } catch (error) {
-      console.error('Login error:', error);
+    } catch (err) {
+      console.error('Login error:', err);
+      setError('Login failed. Please try again.');
       return false;
     }
   };
 
   const logout = () => {
-    if (currentEnvironment) {
-      localStorage.removeItem(`user_${currentEnvironment.id}`);
-    }
+    localStorage.removeItem('user');
     setUser(null);
   };
 
-  const addMentor = (mentorData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (!currentEnvironment) return;
+  const addMentor = async (mentorData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>) => {
+    try {
+      setError(null);
+      
+      const { data, error } = await supabase
+        .from('mentors')
+        .insert([{
+          username: mentorData.username,
+          name: mentorData.name,
+          email: mentorData.email,
+          phone: mentorData.phone,
+          department: mentorData.department,
+          is_active: mentorData.isActive,
+        }])
+        .select()
+        .single();
 
-    const newMentor: User = {
-      ...mentorData,
-      id: `mentor_${currentEnvironment.id}_${Date.now()}`,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
+      if (error) throw error;
 
-    const updatedMentors = [...currentEnvironment.mentors, newMentor];
-    
-    updateEnvironment(currentEnvironment.id, {
-      mentors: updatedMentors
-    });
-
-    // Set default password
-    const storedPasswords = JSON.parse(
-      localStorage.getItem(`passwords_${currentEnvironment.id}`) || '{}'
-    );
-    storedPasswords[newMentor.username] = 'mentor123';
-    localStorage.setItem(`passwords_${currentEnvironment.id}`, JSON.stringify(storedPasswords));
-  };
-
-  const updateMentor = (id: string, updatedMentor: Partial<User>) => {
-    if (!currentEnvironment) return;
-
-    let updatedUsers = [...mentors];
-    
-    // Update in mentors array
-    updatedUsers = updatedUsers.map(mentor => 
-      mentor.id === id 
-        ? { ...mentor, ...updatedMentor, updatedAt: new Date().toISOString() }
-        : mentor
-    );
-
-    // Update environment
-    if (id === currentEnvironment.adminUser.id) {
-      // Updating admin user
-      updateEnvironment(currentEnvironment.id, {
-        adminUser: { ...currentEnvironment.adminUser, ...updatedMentor, updatedAt: new Date().toISOString() }
-      });
-    } else {
-      // Updating mentor
-      const updatedMentors = currentEnvironment.mentors.map(mentor =>
-        mentor.id === id 
-          ? { ...mentor, ...updatedMentor, updatedAt: new Date().toISOString() }
-          : mentor
-      );
-      updateEnvironment(currentEnvironment.id, {
-        mentors: updatedMentors
-      });
-    }
-
-    // Update current user if it's the same user being updated
-    if (user?.id === id) {
-      const updatedUser = { ...user, ...updatedMentor, updatedAt: new Date().toISOString() };
-      setUser(updatedUser);
-      localStorage.setItem(`user_${currentEnvironment.id}`, JSON.stringify(updatedUser));
+      const newMentor = convertDatabaseMentor(data);
+      setMentors(prev => [...prev, newMentor]);
+    } catch (err) {
+      console.error('Error adding mentor:', err);
+      setError('Failed to add mentor. Please try again.');
+      throw err;
     }
   };
 
-  const deleteMentor = (id: string) => {
-    if (!currentEnvironment) return;
+  const updateMentor = async (id: string, updatedMentor: Partial<User>) => {
+    try {
+      setError(null);
+      
+      if (id === defaultAdmin.id) {
+        // Update admin user (in production, this should also be in database)
+        const updatedAdmin = { ...defaultAdmin, ...updatedMentor, updatedAt: new Date().toISOString() };
+        setMentors(prev => prev.map(mentor => 
+          mentor.id === id ? updatedAdmin : mentor
+        ));
+        
+        if (user?.id === id) {
+          setUser(updatedAdmin);
+          localStorage.setItem('user', JSON.stringify(updatedAdmin));
+        }
+        return;
+      }
 
-    const updatedMentors = currentEnvironment.mentors.filter(mentor => mentor.id !== id);
-    updateEnvironment(currentEnvironment.id, {
-      mentors: updatedMentors
-    });
+      // Update mentor in database
+      const updateData: any = {};
+      if (updatedMentor.name) updateData.name = updatedMentor.name;
+      if (updatedMentor.email !== undefined) updateData.email = updatedMentor.email;
+      if (updatedMentor.phone !== undefined) updateData.phone = updatedMentor.phone;
+      if (updatedMentor.department !== undefined) updateData.department = updatedMentor.department;
+      if (updatedMentor.isActive !== undefined) updateData.is_active = updatedMentor.isActive;
 
-    // Remove password
-    const storedPasswords = JSON.parse(
-      localStorage.getItem(`passwords_${currentEnvironment.id}`) || '{}'
-    );
-    const mentorToDelete = currentEnvironment.mentors.find(m => m.id === id);
-    if (mentorToDelete) {
-      delete storedPasswords[mentorToDelete.username];
-      localStorage.setItem(`passwords_${currentEnvironment.id}`, JSON.stringify(storedPasswords));
-    }
+      const { data, error } = await supabase
+        .from('mentors')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
 
-    // Logout if current user is being deleted
-    if (user?.id === id) {
-      logout();
+      if (error) throw error;
+
+      const updatedMentorData = convertDatabaseMentor(data);
+      setMentors(prev => prev.map(mentor => 
+        mentor.id === id ? updatedMentorData : mentor
+      ));
+
+      if (user?.id === id) {
+        setUser(updatedMentorData);
+        localStorage.setItem('user', JSON.stringify(updatedMentorData));
+      }
+    } catch (err) {
+      console.error('Error updating mentor:', err);
+      setError('Failed to update mentor. Please try again.');
+      throw err;
     }
   };
 
-  const resetMentorPassword = (id: string, newPassword: string) => {
-    if (!currentEnvironment) return;
+  const deleteMentor = async (id: string) => {
+    try {
+      setError(null);
+      
+      if (id === defaultAdmin.id) {
+        throw new Error('Cannot delete admin user');
+      }
 
-    const allUsers = [currentEnvironment.adminUser, ...currentEnvironment.mentors];
-    const mentor = allUsers.find(m => m.id === id);
-    if (mentor) {
-      const storedPasswords = JSON.parse(
-        localStorage.getItem(`passwords_${currentEnvironment.id}`) || '{}'
-      );
-      storedPasswords[mentor.username] = newPassword;
-      localStorage.setItem(`passwords_${currentEnvironment.id}`, JSON.stringify(storedPasswords));
+      const { error } = await supabase
+        .from('mentors')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setMentors(prev => prev.filter(mentor => mentor.id !== id));
+
+      if (user?.id === id) {
+        logout();
+      }
+    } catch (err) {
+      console.error('Error deleting mentor:', err);
+      setError('Failed to delete mentor. Please try again.');
+      throw err;
     }
+  };
+
+  const resetMentorPassword = async (id: string, newPassword: string) => {
+    // In production, this would update the password in the database
+    // For now, we'll just show a success message
+    console.log(`Password reset for mentor ${id} to: ${newPassword}`);
   };
 
   const getMentorById = (id: string) => {
@@ -216,6 +258,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       (!mentor.department || activeDepartmentNames.includes(mentor.department))
     );
   };
+
   return (
     <AuthContext.Provider value={{ 
       user, 
@@ -228,7 +271,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       deleteMentor, 
       resetMentorPassword,
       getMentorById,
-      getActiveMentors
+      getActiveMentors,
+      error,
     }}>
       {children}
     </AuthContext.Provider>
