@@ -63,8 +63,16 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-blue-100 to-cyan-50 flex items-center justify-center px-4">
-      <div className="max-w-md w-full space-y-8 transition-all duration-300">
+    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-blue-100 to-cyan-50 overflow-hidden px-4">
+      {/* Blobs */}
+      <div className="absolute inset-0 -z-10">
+        <div className="blob blob-1"></div>
+        <div className="blob blob-2"></div>
+        <div className="blob blob-3"></div>
+      </div>
+
+      <div className="max-w-md w-full space-y-8 transition-all duration-300 z-10">
+        {/* Header */}
         <div className="text-center">
           <div className="flex flex-col items-center space-y-2">
             <img
@@ -86,7 +94,8 @@ const Login: React.FC = () => {
           <p className="mt-2 text-sm text-gray-500">Sign in to access the placement monitoring system</p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-md p-5 border border-gray-100 transition-all duration-300 hover:shadow-lg">
+        {/* Environment Selector */}
+        <div className="bg-white rounded-xl shadow-md p-5 border border-gray-100 transition-all duration-300 hover:shadow-lg backdrop-blur-md bg-opacity-80">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Building className="h-5 w-5 text-primary-600" />
@@ -126,7 +135,8 @@ const Login: React.FC = () => {
           )}
         </div>
 
-        <div className="bg-white rounded-xl shadow-xl p-8 border border-gray-100">
+        {/* Login Form */}
+        <div className="bg-white rounded-xl shadow-xl p-8 border border-gray-100 backdrop-blur-md bg-opacity-80">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="usernameOrEmail" className="block text-sm font-semibold text-gray-700">
@@ -140,7 +150,7 @@ const Login: React.FC = () => {
                   required
                   value={usernameOrEmail}
                   onChange={(e) => setUsernameOrEmail(e.target.value)}
-                  className="input-field pl-10 border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-blue-500 rounded-lg transition-all"
+                  className="input-field pl-10"
                   placeholder="Enter username or email"
                 />
               </div>
@@ -158,7 +168,7 @@ const Login: React.FC = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="input-field pl-10 border border-gray-300 focus:ring-2 focus:ring-blue-400 focus:border-blue-500 rounded-lg transition-all"
+                  className="input-field pl-10"
                   placeholder="Enter password"
                 />
               </div>
