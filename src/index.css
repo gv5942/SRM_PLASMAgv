@@ -15,19 +15,19 @@
   .card {
     @apply bg-white rounded-lg shadow-sm border border-gray-200 p-6;
   }
-  
+
   .btn-primary {
     @apply bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
   }
-  
+
   .btn-secondary {
     @apply bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2;
   }
-  
+
   .input-field {
     @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
   }
-  
+
   .select-field {
     @apply w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white transition-all duration-200;
   }
@@ -41,7 +41,54 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
+}
+
+/* --------------------------------------- */
+/* 🌟 Animated Blobs for Background */
+@layer utilities {
+  .blob {
+    @apply absolute rounded-full mix-blend-multiply opacity-30 blur-2xl animate-blob;
+  }
+
+  .blob-1 {
+    background-color: #60a5fa; /* Blue-400 */
+    width: 18rem;
+    height: 18rem;
+    top: -5rem;
+    left: -4rem;
+    animation-delay: 0s;
+  }
+
+  .blob-2 {
+    background-color: #38bdf8; /* Sky-400 */
+    width: 20rem;
+    height: 20rem;
+    top: -5rem;
+    right: -6rem;
+    animation-delay: 2s;
+  }
+
+  .blob-3 {
+    background-color: #a5b4fc; /* Indigo-300 */
+    width: 22rem;
+    height: 22rem;
+    bottom: -8rem;
+    left: 6rem;
+    animation-delay: 4s;
+  }
+
+  @keyframes blob {
+    0%, 100% {
+      transform: translateY(0px) scale(1);
+    }
+    50% {
+      transform: translateY(20px) scale(1.1);
+    }
+  }
+
+  .animate-blob {
+    animation: blob 8s infinite ease-in-out;
+  }
 }
