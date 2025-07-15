@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Building, BookOpen, Users, CheckCircle, XCircle, X } from 'lucide-react';
-import { useEnvironment } from '../contexts/EnvironmentContext';
+import { Plus, Edit, Trash2, Building, BookOpen, Users, CheckCircle, XCircle, X, AlertCircle, Loader } from 'lucide-react';
 import { useData } from '../contexts/DataContext';
 import { useAuth } from '../contexts/AuthContext';
-import { Department } from '../utils/departmentUtils';
+import { Department, useDepartments } from '../utils/departmentUtils';
 
 interface DepartmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (department: Omit<Department, 'id' | 'createdAt' | 'updatedAt'>) => void;
+  onSave: (department: Omit<Department, 'id' | 'createdAt' | 'updatedAt'>) => Promise<void>;
   department?: Department | null;
+  isLoading?: boolean;
 }
 
-const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, onSave, department }) => {
+const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, onSave, department, isLoading }) => {
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -38,10 +38,14 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, onSa
     }
   }, [department, isOpen]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
-    onClose();
+    try {
+      await onSave(formData);
+      onClose();
+    } catch (error) {
+      // Error is handled by the parent component
+    }
   };
 
   if (!isOpen) return null;
@@ -74,6 +78,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, onSa
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               className="input-field"
               placeholder="e.g., Computer Science"
+              disabled={isLoading}
             />
           </div>
 
@@ -89,6 +94,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, onSa
               className="input-field"
               placeholder="e.g., CS"
               maxLength={5}
+              disabled={isLoading}
             />
           </div>
 
@@ -102,6 +108,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, onSa
               className="input-field"
               placeholder="Brief description of the department"
               rows={3}
+              disabled={isLoading}
             />
           </div>
 
@@ -112,6 +119,7 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, onSa
               checked={formData.isActive}
               onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
               className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+              disabled={isLoading}
             />
             <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
               Active Department
@@ -123,14 +131,23 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, onSa
               type="button"
               onClick={onClose}
               className="btn-secondary flex-1"
+              disabled={isLoading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn-primary flex-1"
+              className="btn-primary flex-1 flex items-center justify-center space-x-2"
+              disabled={isLoading}
             >
-              {department ? 'Update' : 'Add'} Department
+              {isLoading ? (
+                <>
+                  <Loader className="h-4 w-4 animate-spin" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <span>{department ? 'Update' : 'Add'} Department</span>
+              )}
             </button>
           </div>
         </form>
@@ -140,67 +157,65 @@ const DepartmentModal: React.FC<DepartmentModalProps> = ({ isOpen, onClose, onSa
 };
 
 const DepartmentManagement: React.FC = () => {
-  const { currentEnvironment, updateEnvironment } = useEnvironment();
   const { students } = useData();
   const { mentors } = useAuth();
+  const { 
+    departments, 
+    activeDepartments, 
+    isLoading: departmentsLoading, 
+    error: departmentsError,
+    addDepartment, 
+    updateDepartment, 
+    deleteDepartment 
+  } = useDepartments();
+  
   const [isDepartmentModalOpen, setIsDepartmentModalOpen] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState<Department | null>(null);
-
-  const departments = currentEnvironment?.departments || [];
+  const [isOperationLoading, setIsOperationLoading] = useState(false);
+  const [operationError, setOperationError] = useState<string | null>(null);
 
   const handleAddDepartment = () => {
     setEditingDepartment(null);
+    setOperationError(null);
     setIsDepartmentModalOpen(true);
   };
 
   const handleEditDepartment = (department: Department) => {
     setEditingDepartment(department);
+    setOperationError(null);
     setIsDepartmentModalOpen(true);
   };
 
-  const handleSaveDepartment = (departmentData: Omit<Department, 'id' | 'createdAt' | 'updatedAt'>) => {
-    if (!currentEnvironment) return;
+  const handleSaveDepartment = async (departmentData: Omit<Department, 'id' | 'createdAt' | 'updatedAt'>) => {
+    setIsOperationLoading(true);
+    setOperationError(null);
 
-    const existingDepartments = currentEnvironment.departments || [];
-
-    // Check for duplicate name or code
-    const isDuplicate = existingDepartments.some(dept => 
-      dept.id !== editingDepartment?.id && 
-      (dept.name.toLowerCase() === departmentData.name.toLowerCase() || 
-       dept.code.toLowerCase() === departmentData.code.toLowerCase())
-    );
-
-    if (isDuplicate) {
-      alert('Department name or code already exists. Please use different values.');
-      return;
-    }
-
-    let updatedDepartments;
-
-    if (editingDepartment) {
-      // Update existing department
-      updatedDepartments = existingDepartments.map(dept =>
-        dept.id === editingDepartment.id
-          ? { ...dept, ...departmentData, updatedAt: new Date().toISOString() }
-          : dept
+    try {
+      // Check for duplicate name or code (excluding current department if editing)
+      const isDuplicate = departments.some(dept => 
+        dept.id !== editingDepartment?.id && 
+        (dept.name.toLowerCase() === departmentData.name.toLowerCase() || 
+         dept.code.toLowerCase() === departmentData.code.toLowerCase())
       );
-    } else {
-      // Add new department
-      const newDepartment: Department = {
-        ...departmentData,
-        id: `dept_${currentEnvironment.id}_${Date.now()}`,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      };
-      updatedDepartments = [...existingDepartments, newDepartment];
-    }
 
-    updateEnvironment(currentEnvironment.id, { departments: updatedDepartments });
+      if (isDuplicate) {
+        throw new Error('Department name or code already exists. Please use different values.');
+      }
+
+      if (editingDepartment) {
+        await updateDepartment(editingDepartment.id, departmentData);
+      } else {
+        await addDepartment(departmentData);
+      }
+    } catch (err: any) {
+      setOperationError(err.message || 'Failed to save department. Please try again.');
+      throw err;
+    } finally {
+      setIsOperationLoading(false);
+    }
   };
 
-  const handleDeleteDepartment = (department: Department) => {
-    if (!currentEnvironment) return;
-
+  const handleDeleteDepartment = async (department: Department) => {
     // Check if department is being used by students or mentors
     const studentsUsingDept = students.filter(student => student.department === department.name);
     const mentorsUsingDept = mentors.filter(mentor => mentor.department === department.name);
@@ -217,22 +232,21 @@ const DepartmentManagement: React.FC = () => {
       }
     }
 
-    // Proceed with deletion
+    setIsOperationLoading(true);
+    setOperationError(null);
+
     try {
-      const updatedDepartments = departments.filter(dept => dept.id !== department.id);
-      updateEnvironment(currentEnvironment.id, { departments: updatedDepartments });
-      
-      // Show success message
+      await deleteDepartment(department.id);
       alert(`Department "${department.name}" has been deleted successfully.`);
-    } catch (error) {
-      console.error('Error deleting department:', error);
+    } catch (err: any) {
+      setOperationError(err.message || 'Failed to delete department. Please try again.');
       alert('An error occurred while deleting the department. Please try again.');
+    } finally {
+      setIsOperationLoading(false);
     }
   };
 
-  const handleToggleActive = (department: Department) => {
-    if (!currentEnvironment) return;
-
+  const handleToggleActive = async (department: Department) => {
     const studentsUsingDept = students.filter(student => student.department === department.name);
     const mentorsUsingDept = mentors.filter(mentor => mentor.department === department.name);
 
@@ -247,17 +261,31 @@ const DepartmentManagement: React.FC = () => {
         return;
       }
     }
-    const updatedDepartments = departments.map(dept =>
-      dept.id === department.id
-        ? { ...dept, isActive: !dept.isActive, updatedAt: new Date().toISOString() }
-        : dept
-    );
 
-    updateEnvironment(currentEnvironment.id, { departments: updatedDepartments });
+    setIsOperationLoading(true);
+    setOperationError(null);
+
+    try {
+      await updateDepartment(department.id, { isActive: !department.isActive });
+    } catch (err: any) {
+      setOperationError(err.message || 'Failed to update department status. Please try again.');
+    } finally {
+      setIsOperationLoading(false);
+    }
   };
 
-  const activeDepartments = departments.filter(dept => dept.isActive);
   const inactiveDepartments = departments.filter(dept => !dept.isActive);
+
+  if (departmentsLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="flex items-center space-x-2">
+          <Loader className="h-6 w-6 animate-spin text-primary-600" />
+          <span className="text-gray-600">Loading departments...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -270,11 +298,22 @@ const DepartmentManagement: React.FC = () => {
         <button
           onClick={handleAddDepartment}
           className="btn-primary flex items-center space-x-2"
+          disabled={isOperationLoading}
         >
           <Plus className="h-4 w-4" />
           <span>Add Department</span>
         </button>
       </div>
+
+      {/* Error Display */}
+      {(departmentsError || operationError) && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="flex items-center space-x-2">
+            <AlertCircle className="h-5 w-5 text-red-600" />
+            <span className="text-red-800">{departmentsError || operationError}</span>
+          </div>
+        </div>
+      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -390,11 +429,12 @@ const DepartmentManagement: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <button
                         onClick={() => handleToggleActive(department)}
+                        disabled={isOperationLoading}
                         className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                           department.isActive
                             ? 'bg-green-100 text-green-800 hover:bg-green-200'
                             : 'bg-red-100 text-red-800 hover:bg-red-200'
-                        } transition-colors`}
+                        } transition-colors disabled:opacity-50`}
                       >
                         {department.isActive ? (
                           <>
@@ -413,14 +453,16 @@ const DepartmentManagement: React.FC = () => {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleEditDepartment(department)}
-                          className="text-primary-600 hover:text-primary-900 transition-colors"
+                          disabled={isOperationLoading}
+                          className="text-primary-600 hover:text-primary-900 transition-colors disabled:opacity-50"
                           title="Edit Department"
                         >
                           <Edit className="h-4 w-4" />
                         </button>
                         <button
                           onClick={() => handleDeleteDepartment(department)}
-                          className="text-red-600 hover:text-red-900 transition-colors"
+                          disabled={isOperationLoading}
+                          className="text-red-600 hover:text-red-900 transition-colors disabled:opacity-50"
                           title="Delete Department"
                         >
                           <Trash2 className="h-4 w-4" />
@@ -445,9 +487,13 @@ const DepartmentManagement: React.FC = () => {
       {/* Department Modal */}
       <DepartmentModal
         isOpen={isDepartmentModalOpen}
-        onClose={() => setIsDepartmentModalOpen(false)}
+        onClose={() => {
+          setIsDepartmentModalOpen(false);
+          setOperationError(null);
+        }}
         onSave={handleSaveDepartment}
         department={editingDepartment}
+        isLoading={isOperationLoading}
       />
     </div>
   );

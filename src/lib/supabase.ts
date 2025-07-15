@@ -10,6 +10,16 @@ if (!supabaseUrl || !supabaseAnonKey) {
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
 // Database types
+export interface DatabaseDepartment {
+  id: string
+  name: string
+  code: string
+  description?: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}
+
 export interface DatabaseStudent {
   id: string
   roll_number: string
