@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useEnvironment } from '../contexts/EnvironmentContext';
-import { User, Lock, Shield, Users, Mail, Building, ChevronDown } from 'lucide-react';
+import { Lock, Shield, Users, Mail, Building, ChevronDown } from 'lucide-react';
 import logo from '../assets/logo.png';
 
 const Login: React.FC = () => {
@@ -14,9 +14,7 @@ const Login: React.FC = () => {
   const { user, login } = useAuth();
   const { currentEnvironment, environments, switchEnvironment } = useEnvironment();
 
-  if (user) {
-    return <Navigate to="/dashboard" replace />;
-  }
+  if (user) return <Navigate to="/dashboard" replace />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +51,7 @@ const Login: React.FC = () => {
 
   if (!currentEnvironment) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-primary-100 flex items-center justify-center px-4">
+      <div className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-primary-50 to-primary-100">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-primary-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading environments...</p>
@@ -63,15 +61,13 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-blue-100 to-cyan-50 overflow-hidden px-4">
-      {/* Blobs */}
-      <div className="absolute inset-0 -z-10">
-        <div className="blob blob-1"></div>
-        <div className="blob blob-2"></div>
-        <div className="blob blob-3"></div>
-      </div>
+    <div className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden bg-gradient-to-br from-indigo-50 via-blue-100 to-cyan-50">
+      {/* 🟣 Background Blobs */}
+      <div className="blob blob-1"></div>
+      <div className="blob blob-2"></div>
+      <div className="blob blob-3"></div>
 
-      <div className="max-w-md w-full space-y-8 transition-all duration-300 z-10">
+      <div className="max-w-md w-full space-y-8 z-10">
         {/* Header */}
         <div className="text-center">
           <div className="flex flex-col items-center space-y-2">
@@ -94,11 +90,11 @@ const Login: React.FC = () => {
           <p className="mt-2 text-sm text-gray-500">Sign in to access the placement monitoring system</p>
         </div>
 
-        {/* Environment Selector */}
-        <div className="bg-white rounded-xl shadow-md p-5 border border-gray-100 transition-all duration-300 hover:shadow-lg backdrop-blur-md bg-opacity-80">
+        {/* Environment Switcher */}
+        <div className="backdrop-card rounded-xl p-5 transition-all duration-300">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Building className="h-5 w-5 text-primary-600" />
+              <Building className="h-5 w-5 text-blue-600" />
               <div>
                 <div className="text-sm font-medium text-gray-800">Current Environment</div>
                 <div className="text-xs text-gray-500">{currentEnvironment.name}</div>
@@ -136,7 +132,7 @@ const Login: React.FC = () => {
         </div>
 
         {/* Login Form */}
-        <div className="bg-white rounded-xl shadow-xl p-8 border border-gray-100 backdrop-blur-md bg-opacity-80">
+        <div className="backdrop-card rounded-xl shadow-xl p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label htmlFor="usernameOrEmail" className="block text-sm font-semibold text-gray-700">
@@ -183,12 +179,13 @@ const Login: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-blue-600 btn-glow hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? 'Signing in...' : 'Sign In'}
             </button>
           </form>
 
+          {/* Demo Accounts */}
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -204,9 +201,9 @@ const Login: React.FC = () => {
             <div className="mt-4 space-y-3">
               <button
                 onClick={() => handleDemoLogin('admin')}
-                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 transition-all"
+                className="w-full flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-semibold text-gray-700 bg-gray-50 hover:bg-gray-100 transition-all btn-glow"
               >
-                <Shield className="h-4 w-4 mr-2 text-primary-600" />
+                <Shield className="h-4 w-4 mr-2 text-blue-600" />
                 Admin: {currentEnvironment.adminUser.name}
               </button>
 
@@ -215,7 +212,7 @@ const Login: React.FC = () => {
                   <button
                     key={mentor.id}
                     onClick={() => handleDemoLogin('mentor', mentor.username)}
-                    className="flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm"
+                    className="flex items-center justify-center px-3 py-2 border border-gray-300 rounded-lg text-xs font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors shadow-sm btn-glow"
                   >
                     <Users className="h-3 w-3 mr-1 text-green-600" />
                     {mentor.name}
