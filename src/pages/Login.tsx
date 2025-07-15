@@ -11,6 +11,7 @@ const Login: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showEnvironments, setShowEnvironments] = useState(false);
+
   const { user, login } = useAuth();
   const { currentEnvironment, environments, switchEnvironment } = useEnvironment();
 
@@ -62,30 +63,29 @@ const Login: React.FC = () => {
 
   return (
     <div className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden bg-gradient-to-br from-indigo-50 via-blue-100 to-cyan-50">
-      {/* 🟣 Background Blobs */}
+      {/* Background Blobs */}
       <div className="blob blob-1"></div>
       <div className="blob blob-2"></div>
       <div className="blob blob-3"></div>
+      <div className="gradient-overlay"></div>
 
       <div className="max-w-md w-full space-y-8 z-10">
         {/* Header */}
         <div className="text-center">
-          <div className="flex flex-col items-center space-y-2">
-            <img
-              src={logo}
-              alt="SRM Plasma Logo"
-              className="h-24 w-auto mb-2 object-contain drop-shadow-md"
-              style={{ maxWidth: '320px' }}
-            />
-            <h1 className="text-4xl font-extrabold flex items-center justify-center space-x-3 tracking-tight">
-              <span className="bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent drop-shadow-xl animate-pulse">
-                Mentee
-              </span>
-              <span className="text-cyan-600 font-black tracking-widest drop-shadow-md">
-                Elevatr 360
-              </span>
-            </h1>
-          </div>
+          <img
+            src={logo}
+            alt="SRM Plasma Logo"
+            className="h-24 w-auto mb-2 object-contain drop-shadow-md"
+            style={{ maxWidth: '320px' }}
+          />
+          <h1 className="text-4xl font-extrabold flex items-center justify-center space-x-3 tracking-tight">
+            <span className="bg-gradient-to-r from-blue-700 via-blue-500 to-cyan-400 bg-clip-text text-transparent drop-shadow-xl animate-pulse">
+              Mentee
+            </span>
+            <span className="text-cyan-600 font-black tracking-widest drop-shadow-md">
+              Elevatr 360
+            </span>
+          </h1>
           <h2 className="mt-4 text-xl font-semibold text-gray-800">University Placement Dashboard</h2>
           <p className="mt-2 text-sm text-gray-500">Sign in to access the placement monitoring system</p>
         </div>
