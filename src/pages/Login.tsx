@@ -62,13 +62,17 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden bg-gradient-to-br from-indigo-50 via-blue-100 to-cyan-50">
-      {/* Background Blobs */}
+    <div className="relative min-h-screen flex items-center justify-center px-4 overflow-hidden">
+      {/* 🌊 Ocean Background */}
+      <div className="ocean-bg" />
+
+      {/* 🎨 Blobs & Overlay */}
       <div className="blob blob-1"></div>
       <div className="blob blob-2"></div>
       <div className="blob blob-3"></div>
       <div className="gradient-overlay"></div>
 
+      {/* Login Card */}
       <div className="max-w-md w-full space-y-8 z-10">
         {/* Header */}
         <div className="text-center">
@@ -87,7 +91,7 @@ const Login: React.FC = () => {
             </span>
           </h1>
           <h2 className="mt-4 text-xl font-semibold text-gray-800">University Placement Dashboard</h2>
-          <p className="mt-2 text-sm text-gray-500">Sign in to access the placement monitoring system</p>
+          <p className="mt-2 text-sm text-gray-100">Sign in to access the placement monitoring system</p>
         </div>
 
         {/* Environment Switcher */}
