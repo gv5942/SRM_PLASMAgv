@@ -130,7 +130,7 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
           const email = getValue(row, 'email');
           const personalEmail = getValue(row, 'personalEmail');
           const mobileNumber = getValue(row, 'mobileNumber');
-          const department = getValue(row, 'department');
+          const department = validateDepartment(getValue(row, 'department'));
           const section = getValue(row, 'section') || 'A';
           const gender = getValue(row, 'gender') as 'Male' | 'Female' | 'Other' | undefined;
           const dateOfBirth = convertExcelDateToString(getValue(row, 'dateOfBirth'));

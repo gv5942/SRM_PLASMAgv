@@ -560,7 +560,12 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
 
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
             <p className="text-sm text-yellow-800">
-              <strong>Note:</strong> Students with less than 60% in any of 10th, 12th, or UG will be automatically marked as ineligible for placement.
+              <strong>Eligibility Rules:</strong> Students must have:
+              <br />• 10th Percentage ≥ 60%
+              <br />• 12th Percentage ≥ 60% 
+              <br />• UG Percentage ≥ 60%
+              <br />• CGPA ≥ 6.0 (if provided)
+              <br />Students not meeting these criteria will be automatically marked as ineligible for placement.
             </p>
           </div>
 
