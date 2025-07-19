@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, FileSpreadsheet, AlertCircle, CheckCircle, Download, Info } from 'lucide-react';
-import { parseExcelFile, generateExcelTemplate } from '../utils/excelUtils';
+import { parseStudentsFromExcel, generateExcelTemplate } from '../utils/excelUtils';
 import { Student } from '../types';
 
 interface ExcelUploadProps {
@@ -22,7 +22,7 @@ const ExcelUpload: React.FC<ExcelUploadProps> = ({ onUpload }) => {
     setUploadStatus('idle');
 
     try {
-      const students = await parseExcelFile(file);
+      const students = await parseStudentsFromExcel(file);
       onUpload(students);
       setUploadedCount(students.length);
       setUploadStatus('success');
