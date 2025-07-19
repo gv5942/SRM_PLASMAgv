@@ -195,3 +195,32 @@ export function parsePlacementsFromExcel(file: File): Promise<any[]> {
     reader.readAsArrayBuffer(file);
   });
 }
+
+export function generateExcelTemplate(): void {
+  const studentTemplate = [
+    {
+      'Roll Number': 'CS001',
+      'Student Name': 'John Doe',
+      'Email': 'john.doe@college.edu',
+      'Personal Email': 'john.doe@gmail.com',
+      'Mobile Number': '9876543210',
+      'Department': 'Computer Science',
+      'Section': 'A',
+      'Gender': 'Male',
+      'Date of Birth': '2000-01-15',
+      'Number of Backlogs': 0,
+      'Resume Link': 'https://example.com/resume.pdf',
+      'Photo URL': 'https://example.com/photo.jpg',
+      'Mentor ID': 'MENTOR001',
+      '10th Percentage': 85.5,
+      '12th Percentage': 88.2,
+      'UG Percentage': 75.8,
+      'CGPA': 7.58
+    }
+  ];
+
+  const ws = XLSX.utils.json_to_sheet(studentTemplate);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Students');
+  XLSX.writeFile(wb, 'student_template.xlsx');
+}
