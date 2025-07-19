@@ -47,14 +47,36 @@ export const exportToExcel = (data: any[], filename: string = 'placement_data.xl
 export const exportToCSV = (data: any[], filename: string = 'placement_data.csv') => {
   const worksheet = XLSX.utils.json_to_sheet(data);
   const csv = XLSX.utils.sheet_to_csv(worksheet);
-  const data_blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  
-  saveAs(data_blob, filename);
-};
-
-export const parseExcelFile = (file: File): Promise<Student[]> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
+    'computer science': 'Computer Science',
+    'computer science and engineering': 'Computer Science',
+    'cse': 'Computer Science',
+    'cs': 'Computer Science',
+    'information technology': 'Information Technology',
+    'it': 'Information Technology',
+    'electronics & communication': 'Electronics & Communication',
+    'electronics and communication': 'Electronics & Communication',
+    'electronics and communication engineering': 'Electronics & Communication',
+    'ece': 'Electronics & Communication',
+    'ec': 'Electronics & Communication',
+    'mechanical engineering': 'Mechanical Engineering',
+    'mechanical': 'Mechanical Engineering',
+    'mech': 'Mechanical Engineering',
+    'me': 'Mechanical Engineering',
+    'civil engineering': 'Civil Engineering',
+    'civil': 'Civil Engineering',
+    'ce': 'Civil Engineering',
+    'electrical engineering': 'Electrical Engineering',
+    'electrical': 'Electrical Engineering',
+    'eee': 'Electrical Engineering',
+    'ee': 'Electrical Engineering',
+    'chemical engineering': 'Chemical Engineering',
+    'chemical': 'Chemical Engineering',
+    'che': 'Chemical Engineering',
+    'ch': 'Chemical Engineering',
+    'biotechnology': 'Biotechnology',
+    'biotech': 'Biotechnology',
+    'bt': 'Biotechnology',
+    'bio': 'Biotechnology',
     
     reader.onload = (e) => {
       try {
@@ -142,14 +164,30 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
           // Extract academic details with safe parsing
           const tenthPercentage = parseNumber(getValue(row, 'tenthPercentage'), 0);
           const twelfthPercentage = parseNumber(getValue(row, 'twelfthPercentage'), 0);
-          const ugPercentage = parseNumber(getValue(row, 'ugPercentage'), 0);
-          const cgpa = parseNumber(getValue(row, 'cgpa'), 0);
+          
+          // Handle UG Percentage - convert from 100 scale to 10 scale if needed
+          let ugPercentage = parseNumber(getValue(row, 'ugPercentage'), 0);
+          if (ugPercentage > 10) {
+            // Convert from 100 scale to 10 scale (e.g., 75% becomes 7.5)
+            ugPercentage = ugPercentage / 10;
+          }
+          
+          // Handle CGPA - should already be out of 10
+          let cgpa = parseNumber(getValue(row, 'cgpa'), 0);
+          if (cgpa > 10) {
+            // If CGPA is mistakenly entered as percentage, convert it
+            cgpa = cgpa / 10;
+          }
 
           // Determine eligibility based on academic performance
           let status: 'placed' | 'eligible' | 'higher_studies' | 'ineligible' = 'eligible';
           const importedStatus = getValue(row, 'status').toLowerCase();
           
-          if (tenthPercentage < 60 || twelfthPercentage < 60 || ugPercentage < 60) {
+          // Updated eligibility criteria: 10th >= 60%, 12th >= 60%, UG >= 6.0 (out of 10), CGPA >= 6.0 (if provided)
+          const ugEligible = ugPercentage >= 6.0; // UG out of 10, so 6.0 is the minimum
+          const cgpaEligible = cgpa === 0 || cgpa >= 6.0; // CGPA check only if provided
+          
+          if (tenthPercentage < 60 || twelfthPercentage < 60 || !ugEligible || !cgpaEligible) {
             status = 'ineligible';
           } else if (importedStatus === 'higher_studies' || importedStatus === 'higher studies') {
             status = 'higher_studies';
@@ -214,19 +252,19 @@ export const parseExcelFile = (file: File): Promise<Student[]> => {
       }
     };
 
-    reader.onerror = () => reject(new Error('Failed to read file'));
-    reader.readAsArrayBuffer(file);
-  });
-};
-
-// Template generator for Excel import
-export const generateExcelTemplate = (departmentNames?: string[]) => {
-  // Use provided department names or fallback to default
-  const departments = departmentNames || [
-    'Computer Science',
-    'Information Technology', 
-    'Electronics & Communication',
-    'Mechanical Engineering'
+    // Additional common variations
+    'computer': 'Computer Science',
+    'computers': 'Computer Science',
+    'info tech': 'Information Technology',
+    'information tech': 'Information Technology',
+    'electronics': 'Electronics & Communication',
+    'electronics comm': 'Electronics & Communication',
+    'electronics communication': 'Electronics & Communication',
+    'mech eng': 'Mechanical Engineering',
+    'mechanical eng': 'Mechanical Engineering',
+    'civil eng': 'Civil Engineering',
+    'electrical eng': 'Electrical Engineering',
+    'chemical eng': 'Chemical Engineering',
   ];
   
   const templateData = [
