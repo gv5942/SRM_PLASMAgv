@@ -441,7 +441,7 @@ const StudentModal: React.FC<StudentModalProps> = ({ isOpen, onClose, onSave, st
                   value={formData.ugPercentage}
                   onChange={(e) => setFormData({ ...formData, ugPercentage: e.target.value })}
                   className="input-field"
-                  placeholder="e.g., 7.5"
+                  placeholder="e.g., 7.74"
                 />
               </div>
 
