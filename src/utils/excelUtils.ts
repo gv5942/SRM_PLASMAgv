@@ -281,5 +281,5 @@ export function generateExcelTemplate(): void {
   const ws = XLSX.utils.json_to_sheet(studentTemplate);
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, 'Students');
-  XLSX.writeFile(wb, 'student_template.xlsx');
+  XLSX.writeFile(wb, 'student_template.xlsx');A
 }
