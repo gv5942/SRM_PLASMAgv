@@ -86,25 +86,23 @@ function convertExcelDateToString(excelDate: any): string | null {
 }
 
 // Helper function to map department names to active departments
-function mapDepartmentName(importedDept: string, availableDepartments: any[]): string {
+function mapDepartmentName(importedDept: string, availableDepartments: any[] = []): string {
   if (!importedDept || !availableDepartments.length) {
-    return availableDepartments[0]?.name || 'Unknown';
+    return availableDepartments[0]?.name || 'Computer Science';
   }
 
   const deptLower = importedDept.toLowerCase().trim();
   
   // Department mapping with common variations
   const departmentMappings: { [key: string]: string[] } = {
-    'Computer Science': ['cs', 'cse', 'computer science', 'computer science and engineering', 'comp sci'],
-    'Electronics and Communication': ['ece', 'electronics', 'electronics and communication', 'electronics and communication engineering'],
+    'Computer Science': ['cs', 'cse', 'computer science', 'computer science and engineering', 'comp sci', 'computer science engineering'],
+    'Information Technology': ['it', 'info tech', 'information technology', 'information tech'],
+    'Electronics & Communication': ['ece', 'electronics', 'electronics and communication', 'electronics and communication engineering', 'electronics & communication'],
     'Mechanical Engineering': ['me', 'mech', 'mechanical', 'mechanical engineering'],
     'Civil Engineering': ['ce', 'civil', 'civil engineering'],
     'Electrical Engineering': ['ee', 'electrical', 'electrical engineering'],
-    'Information Technology': ['it', 'info tech', 'information technology'],
     'Chemical Engineering': ['che', 'chemical', 'chemical engineering'],
     'Biotechnology': ['bt', 'biotech', 'biotechnology'],
-    'Aerospace Engineering': ['ae', 'aerospace', 'aerospace engineering'],
-    'Automobile Engineering': ['auto', 'automobile', 'automobile engineering']
   };
 
   // First try exact match with available departments
@@ -139,8 +137,8 @@ function mapDepartmentName(importedDept: string, availableDepartments: any[]): s
   return availableDepartments[0]?.name || 'Unknown';
 }
 
-// Helper function to convert percentage to CGPA scale (100 to 10)
-function convertPercentageToCGPA(value: number): number {
+// Helper function to convert UG percentage from 100 scale to 10 scale
+function convertUGPercentageToScale10(value: number): number {
   if (value > 10) {
     return Number((value / 10).toFixed(2));
   }
@@ -176,31 +174,35 @@ export function parseStudentsFromExcel(file: File, availableDepartments: any[] =
         const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
         const students = jsonData.map((row: any) => {
-          // Convert UG percentage from 100 scale to 10 scale if needed
-          const ugPercentage = convertPercentageToCGPA(Number(row['UG Percentage'] || row['ug_percentage'] || 0));
-          const cgpa = row['CGPA'] || row['cgpa'] ? convertPercentageToCGPA(Number(row['CGPA'] || row['cgpa'])) : null;
+          // Convert UG percentage from 100 scale to 10 scale
+          const rawUGValue = Number(row['UG Percentage'] || row['UG CGPA'] || row['ug_percentage'] || row['ugPercentage'] || row['CGPA'] || row['cgpa'] || 0);
+          const ugPercentage = convertUGPercentageToScale10(rawUGValue);
+          
+          // Handle separate CGPA field if provided
+          const rawCGPAValue = row['CGPA'] || row['cgpa'];
+          const cgpa = rawCGPAValue ? convertUGPercentageToScale10(Number(rawCGPAValue)) : null;
 
           const student = {
-            roll_number: String(row['Roll Number'] || row['roll_number'] || ''),
-            student_name: String(row['Student Name'] || row['student_name'] || ''),
-            email: String(row['Email'] || row['email'] || ''),
-            personal_email: String(row['Personal Email'] || row['personal_email'] || ''),
-            mobile_number: String(row['Mobile Number'] || row['mobile_number'] || ''),
+            roll_number: String(row['REG NO'] || row['Roll Number'] || row['roll_number'] || row['Student ID'] || row['ID'] || ''),
+            student_name: String(row['NAME'] || row['Student Name'] || row['student_name'] || row['Name'] || row['Full Name'] || ''),
+            email: String(row['OFFICIAL MAIL.ID'] || row['Email'] || row['Official Email'] || row['email'] || ''),
+            personal_email: String(row['PERSONAL  MAIL ID'] || row['Personal Email'] || row['personal_email'] || ''),
+            mobile_number: String(row['MOBILE NUMBER'] || row['Mobile Number'] || row['Phone'] || row['mobile_number'] || ''),
             department: mapDepartmentName(String(row['Department'] || row['department'] || ''), availableDepartments),
-            section: String(row['Section'] || row['section'] || ''),
-            gender: String(row['Gender'] || row['gender'] || ''),
-            date_of_birth: convertExcelDateToString(row['Date of Birth'] || row['date_of_birth']),
-            number_of_backlogs: Number(row['Number of Backlogs'] || row['number_of_backlogs'] || 0),
-            resume_link: String(row['Resume Link'] || row['resume_link'] || ''),
-            photo_url: String(row['Photo URL'] || row['photo_url'] || ''),
-            mentor_id: String(row['Mentor ID'] || row['mentor_id'] || ''),
-            tenth_percentage: Number(row['10th Percentage'] || row['tenth_percentage'] || 0),
-            twelfth_percentage: Number(row['12th Percentage'] || row['twelfth_percentage'] || 0),
+            section: String(row['Section'] || row['section'] || 'A'),
+            gender: String(row['GENDER'] || row['Gender'] || row['Sex'] || row['gender'] || ''),
+            date_of_birth: convertExcelDateToString(row['DOB'] || row['Date of Birth'] || row['Birth Date'] || row['date_of_birth']),
+            number_of_backlogs: Number(row['NO OF BACKLOG'] || row['Number of Backlogs'] || row['Backlogs'] || row['number_of_backlogs'] || 0),
+            resume_link: String(row['RESUME LINK'] || row['Resume Link'] || row['CV Link'] || row['resume_link'] || ''),
+            photo_url: String(row['pHoto'] || row['Photo URL'] || row['Photo Link'] || row['Image URL'] || row['photo_url'] || ''),
+            mentor_id: String(row['Mentor ID'] || row['mentor_id'] || availableDepartments[0]?.mentors?.[0]?.id || ''),
+            tenth_percentage: Number(row['10th Percentage'] || row['10th %'] || row['Class 10'] || row['SSC'] || row['tenth_percentage'] || 0),
+            twelfth_percentage: Number(row['12th Percentage'] || row['12th %'] || row['HSC'] || row['Intermediate'] || row['twelfth_percentage'] || 0),
             ug_percentage: ugPercentage,
             cgpa: cgpa,
             status: determineEligibility(
-              Number(row['10th Percentage'] || row['tenth_percentage'] || 0),
-              Number(row['12th Percentage'] || row['twelfth_percentage'] || 0),
+              Number(row['10th Percentage'] || row['10th %'] || row['Class 10'] || row['SSC'] || row['tenth_percentage'] || 0),
+              Number(row['12th Percentage'] || row['12th %'] || row['HSC'] || row['Intermediate'] || row['twelfth_percentage'] || 0),
               ugPercentage,
               cgpa
             )
