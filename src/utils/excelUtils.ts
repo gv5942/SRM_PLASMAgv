@@ -39,6 +39,24 @@ export function exportToCSV(data: any[], filename: string = 'export.csv'): void 
   document.body.removeChild(link);
 }
 
+// Helper function to export data to Excel
+export function exportToExcel(data: any[], filename: string = 'export.xlsx'): void {
+  if (!data || data.length === 0) {
+    console.warn('No data to export');
+    return;
+  }
+
+  // Create worksheet from JSON data
+  const ws = XLSX.utils.json_to_sheet(data);
+  
+  // Create workbook and add worksheet
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Data');
+  
+  // Write file
+  XLSX.writeFile(wb, filename);
+}
+
 // Helper function to convert Excel date serial to YYYY-MM-DD string
 function convertExcelDateToString(excelDate: any): string | null {
   if (!excelDate) return null;
@@ -142,7 +160,7 @@ function determineEligibility(tenthPercentage: number, twelfthPercentage: number
       (!cgpa || cgpa >= minCGPA)) {
     return 'eligible';
   }
-  return 'not_eligible';
+  return 'ineligible';
 }
 
 export function parseStudentsFromExcel(file: File, availableDepartments: any[] = []): Promise<any[]> {
